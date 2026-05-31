@@ -118,6 +118,12 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (warpManager.getOverlappingWarp(player.getLocation()) != null) {
+            messageManager.send(sender, "warp.overlaps_existing");
+            playErrorSound(sender);
+            return;
+        }
+
         if (warpManager.createWarp(warp)) {
             messageManager.send(sender, "warp.created", Map.of("name", warpName));
             playSuccessSound(sender);
