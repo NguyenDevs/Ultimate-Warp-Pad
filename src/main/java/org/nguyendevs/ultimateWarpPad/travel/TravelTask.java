@@ -45,15 +45,16 @@ public class TravelTask extends BukkitRunnable {
     private BossBar travelBossBar;
 
     public TravelTask(JavaPlugin plugin, Player player, Warp source, Warp destination,
-                      ConfigManager config, AnimationManager animationManager,
-                      MessageManager messageManager, TravelQueue travelQueue, double relOffsetX, double relOffsetZ) {
-        this(plugin, player, source, destination, config, animationManager, messageManager, null, travelQueue, relOffsetX, relOffsetZ);
+            ConfigManager config, AnimationManager animationManager,
+            MessageManager messageManager, TravelQueue travelQueue, double relOffsetX, double relOffsetZ) {
+        this(plugin, player, source, destination, config, animationManager, messageManager, null, travelQueue,
+                relOffsetX, relOffsetZ);
     }
 
     public TravelTask(JavaPlugin plugin, Player player, Warp source, Warp destination,
-                      ConfigManager config, AnimationManager animationManager,
-                      MessageManager messageManager, GroupTravelSession session,
-                      TravelQueue travelQueue, double relOffsetX, double relOffsetZ) {
+            ConfigManager config, AnimationManager animationManager,
+            MessageManager messageManager, GroupTravelSession session,
+            TravelQueue travelQueue, double relOffsetX, double relOffsetZ) {
         this.plugin = plugin;
         this.player = player;
         this.source = source;
@@ -84,14 +85,11 @@ public class TravelTask extends BukkitRunnable {
             return;
         }
 
-        // Initialize persistent progress boss bar on the very first tick
         if (ticks == 0 && config.isMessageBossBarEnabled()) {
             Component bossText = messageManager.get("travel_boss_bar.start");
-            travelBossBar = BossBar.bossBar(bossText, 0.0f, BossBar.Color.WHITE, BossBar.Overlay.NOTCHED_10);
+            travelBossBar = BossBar.bossBar(bossText, 0.0f, BossBar.Color.BLUE, BossBar.Overlay.NOTCHED_10);
             player.showBossBar(travelBossBar);
         }
-
-        // Update boss bar progress every tick
         if (travelBossBar != null) {
             updateBossBarProgress();
         }
@@ -114,7 +112,8 @@ public class TravelTask extends BukkitRunnable {
                 } else {
                     animationManager.playLandingAnimation(source);
                 }
-                if (session == null) travelQueue.onComplete(destination);
+                if (session == null)
+                    travelQueue.onComplete(destination);
                 this.cancel();
                 return;
             }
@@ -166,7 +165,8 @@ public class TravelTask extends BukkitRunnable {
             player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, Integer.MAX_VALUE, 60, false, false));
             Location ploc = player.getLocation();
             player.getWorld().playSound(ploc, "minecraft:block.portal.ambient", SoundCategory.AMBIENT, 0.8f, 0.1f);
-            player.getWorld().playSound(ploc, "minecraft:ambient.crimson_forest.loop", SoundCategory.AMBIENT, 1.0f, 1.0f);
+            player.getWorld().playSound(ploc, "minecraft:ambient.crimson_forest.loop", SoundCategory.AMBIENT, 1.0f,
+                    1.0f);
 
         }
 
@@ -203,14 +203,16 @@ public class TravelTask extends BukkitRunnable {
             if (session != null) {
                 session.removePlayer(player);
             }
-            if (session == null) travelQueue.onComplete(destination);
+            if (session == null)
+                travelQueue.onComplete(destination);
             cleanup();
         }
     }
 
     private void spawnConvergeParticles() {
         World world = source.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         double cx = Math.floor(source.getX()) + 0.5;
         double cz = Math.floor(source.getZ()) + 0.5;
@@ -233,14 +235,16 @@ public class TravelTask extends BukkitRunnable {
                 double angle = Math.random() * 2 * Math.PI;
                 double r = 2.5 + Math.random() * 1.0;
                 double y = cy + Math.random() * 3.0;
-                world.spawnParticle(particle, cx + Math.cos(angle) * r, y, cz + Math.sin(angle) * r, 0, 0, 0.04, 0, 0.2);
+                world.spawnParticle(particle, cx + Math.cos(angle) * r, y, cz + Math.sin(angle) * r, 0, 0, 0.04, 0,
+                        0.2);
             }
         }
     }
 
     private void spawnSpiralParticles() {
         World world = source.getWorld();
-        if (world == null) return;
+        if (world == null)
+            return;
 
         double cx = Math.floor(source.getX()) + 0.5;
         double cz = Math.floor(source.getZ()) + 0.5;
@@ -285,11 +289,9 @@ public class TravelTask extends BukkitRunnable {
         teleported = true;
 
         if (session != null) {
-            Bukkit.getScheduler().runTaskLater(plugin, () ->
-                    session.onPlayerTeleported(player), 40L);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> session.onPlayerTeleported(player), 40L);
         } else {
-            Bukkit.getScheduler().runTaskLater(plugin, () ->
-                    animationManager.playLandingAnimation(source), 40L);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> animationManager.playLandingAnimation(source), 40L);
         }
     }
 
@@ -307,12 +309,14 @@ public class TravelTask extends BukkitRunnable {
         messageManager.sendTravel(player, "arrived",
                 Map.of("destination", destination.getWarpName()));
         hideBossBarWithMessage("arrived", Map.of("destination", destination.getWarpName()));
-        if (session == null) travelQueue.onComplete(destination);
+        if (session == null)
+            travelQueue.onComplete(destination);
         this.cancel();
     }
 
     private void playCancelSound() {
-        source.getWorld().playSound(source.getLocation(), "minecraft:block.beacon.deactivate", SoundCategory.AMBIENT, 1.0f, 0.8f);
+        source.getWorld().playSound(source.getLocation(), "minecraft:block.beacon.deactivate", SoundCategory.AMBIENT,
+                1.0f, 0.8f);
     }
 
     private void onDamageTaken() {
@@ -326,7 +330,8 @@ public class TravelTask extends BukkitRunnable {
         if (session != null) {
             session.removePlayer(player);
         }
-        if (session == null) travelQueue.onComplete(destination);
+        if (session == null)
+            travelQueue.onComplete(destination);
         cleanup();
     }
 
@@ -336,7 +341,8 @@ public class TravelTask extends BukkitRunnable {
             messageManager.sendTravel(player, "cancelled");
             hideBossBarWithMessage("cancelled", Map.of());
             playCancelSound();
-            if (session == null) travelQueue.onComplete(destination);
+            if (session == null)
+                travelQueue.onComplete(destination);
         }
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -347,32 +353,27 @@ public class TravelTask extends BukkitRunnable {
         this.cancel();
     }
 
-    /** Calculates and sets boss bar fill: 0→1 ascending, 1→0 descending. */
     private void updateBossBarProgress() {
         float progress;
         if (!teleported) {
-            // Ascending: rises from source.getY() (warp surface) to floor(source.getY())+2+launchY (peak)
             double startY = source.getY();
-            double endY   = Math.floor(source.getY()) + 2.0 + config.getLaunchY();
+            double endY = Math.floor(source.getY()) + 2.0 + config.getLaunchY();
             progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / (endY - startY)));
         } else {
-            // Descending: falls from floor(dest.getY())+2+launchY (peak) back to dest.getY() (landing)
             double startY = destination.getY();
-            double endY   = Math.floor(destination.getY()) + 2.0 + config.getLaunchY();
+            double endY = Math.floor(destination.getY()) + 2.0 + config.getLaunchY();
             progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / (endY - startY)));
         }
         travelBossBar.progress(progress);
     }
 
-    /**
-     * Swaps the boss bar text to the final key, sets progress to 0,
-     * and schedules the bar to hide after 3 s. Safe to call multiple times.
-     */
     private void hideBossBarWithMessage(String key, Map<String, String> placeholders) {
-        if (travelBossBar == null) return;
+        if (travelBossBar == null)
+            return;
         final BossBar bar = travelBossBar;
         travelBossBar = null;
-        if (!player.isOnline()) return;
+        if (!player.isOnline())
+            return;
         Component text = messageManager.get("travel_boss_bar." + key, placeholders);
         bar.name(text);
         bar.progress(0.0f);
