@@ -151,9 +151,9 @@ public class WarpSelectionGUI {
 
     private Material getModeIcon(int mode) {
         return switch (mode) {
-            case 0 -> Material.NETHERITE_BLOCK;
-            case 1 -> Material.DIAMOND_BLOCK;
-            default -> Material.GOLD_BLOCK;
+            case 0 -> Material.BEACON;
+            case 1 -> Material.NETHER_STAR;
+            default -> Material.TOTEM_OF_UNDYING;
         };
     }
 
