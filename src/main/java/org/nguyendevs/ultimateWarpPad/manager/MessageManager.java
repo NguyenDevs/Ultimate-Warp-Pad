@@ -56,7 +56,8 @@ public class MessageManager {
     }
 
     private String convertLegacyCodes(String text) {
-        if (!text.contains("&")) return text;
+        if (!text.contains("&"))
+            return text;
         return text
                 .replace("&0", "<black>").replace("&1", "<dark_blue>")
                 .replace("&2", "<dark_green>").replace("&3", "<dark_aqua>")
@@ -136,16 +137,10 @@ public class MessageManager {
         player.sendMessage(get(path, placeholders));
     }
 
-    /** Called after ConfigManager is ready so sendTravel can read channel flags. */
     public void setConfigManager(ConfigManager configManager) {
         this.configManager = configManager;
     }
 
-    /**
-     * Sends a travel message (start/arrived/cancelled/cooldown) through all
-     * channels enabled in config.yml under the message.* section.
-     * The key is the sub-key (e.g. "start", "arrived").
-     */
     public void sendTravel(Player player, String key, Map<String, String> placeholders) {
         if (configManager == null) {
             send(player, "travel_chat." + key, placeholders);
@@ -167,7 +162,6 @@ public class MessageManager {
             }
             player.sendActionBar(miniMessage.deserialize(convertLegacyCodes(raw)));
         }
-
 
         if (configManager.isMessageTitleEnabled()) {
             String titleRaw = getRaw("travel_title." + key);
@@ -231,7 +225,8 @@ public class MessageManager {
     void autoUpdateKeys() {
         File file = new File(plugin.getDataFolder(), "messages.yml");
         try (InputStream defStream = plugin.getResource("messages.yml")) {
-            if (defStream == null) return;
+            if (defStream == null)
+                return;
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
                     new InputStreamReader(defStream, StandardCharsets.UTF_8));
             YamlConfiguration serverConfig = YamlConfiguration.loadConfiguration(file);
