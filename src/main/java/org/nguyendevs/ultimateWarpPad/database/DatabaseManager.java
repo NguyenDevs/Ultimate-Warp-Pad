@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
@@ -105,6 +106,13 @@ public class DatabaseManager {
                     "composite_id VARCHAR(100) NOT NULL, " +
                     "player_uuid VARCHAR(36) NOT NULL, " +
                     "PRIMARY KEY (composite_id, player_uuid)" +
+                    ")");
+
+            stmt.execute("CREATE TABLE IF NOT EXISTS warp_terrain (" +
+                    "composite_id VARCHAR(100) NOT NULL, " +
+                    "idx INT NOT NULL, " +
+                    "block_data TEXT NOT NULL, " +
+                    "PRIMARY KEY (composite_id, idx)" +
                     ")");
         }
     }
@@ -248,10 +256,66 @@ public class DatabaseManager {
                     ps.setString(1, warp.getCompositeId());
                     ps.executeUpdate();
                 }
+
+                String deleteTerrain = "DELETE FROM warp_terrain WHERE composite_id = ?";
+                try (PreparedStatement ps = connection.prepareStatement(deleteTerrain)) {
+                    ps.setString(1, warp.getCompositeId());
+                    ps.executeUpdate();
+                }
             } catch (SQLException e) {
                 plugin.getLogger().severe("Failed to delete warp: " + e.getMessage());
                 e.printStackTrace();
             }
+        }, dbExecutor);
+    }
+
+    public CompletableFuture<Void> saveTerrainSnapshot(String compositeId, List<String> blockDataStrings) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                String deleteSql = "DELETE FROM warp_terrain WHERE composite_id = ?";
+                try (PreparedStatement ps = connection.prepareStatement(deleteSql)) {
+                    ps.setString(1, compositeId);
+                    ps.executeUpdate();
+                }
+
+                String insertSql = "INSERT INTO warp_terrain (composite_id, idx, block_data) VALUES (?, ?, ?)";
+                connection.setAutoCommit(false);
+                try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
+                    for (int i = 0; i < blockDataStrings.size(); i++) {
+                        ps.setString(1, compositeId);
+                        ps.setInt(2, i);
+                        ps.setString(3, blockDataStrings.get(i));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                try { connection.rollback(); } catch (SQLException ignored) {}
+                plugin.getLogger().severe("Failed to save terrain snapshot: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                try { connection.setAutoCommit(true); } catch (SQLException ignored) {}
+            }
+        }, dbExecutor);
+    }
+
+    public CompletableFuture<List<String>> loadTerrainSnapshot(String compositeId) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<String> result = new ArrayList<>();
+            String sql = "SELECT block_data FROM warp_terrain WHERE composite_id = ? ORDER BY idx ASC";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, compositeId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(rs.getString("block_data"));
+                    }
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().severe("Failed to load terrain snapshot: " + e.getMessage());
+                e.printStackTrace();
+            }
+            return result;
         }, dbExecutor);
     }
 
