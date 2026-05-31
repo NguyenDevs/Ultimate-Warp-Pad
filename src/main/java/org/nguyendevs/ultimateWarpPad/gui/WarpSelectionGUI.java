@@ -356,7 +356,11 @@ public class WarpSelectionGUI {
         double relZ = player.getZ() - centerZ;
 
         if (configManager.isCenter()) {
-            player.teleport(new Location(source.getWorld(), centerX, source.getY() + 1, centerZ));
+            Location snapLoc = player.getLocation().clone();
+            snapLoc.setX(centerX);
+            snapLoc.setY(source.getY() + 1);
+            snapLoc.setZ(centerZ);
+            player.teleport(snapLoc);
         }
 
         messageManager.send(player, "travel.start");
@@ -407,7 +411,11 @@ public class WarpSelectionGUI {
             double relZ = member.getZ() - centerZ;
 
             if (configManager.isCenter()) {
-                member.teleport(new Location(source.getWorld(), centerX, source.getY() + 1, centerZ));
+                Location snapLoc = member.getLocation().clone();
+                snapLoc.setX(centerX);
+                snapLoc.setY(source.getY() + 1);
+                snapLoc.setZ(centerZ);
+                member.teleport(snapLoc);
             }
 
             final int startOffset = delay;
