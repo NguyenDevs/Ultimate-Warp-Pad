@@ -157,7 +157,7 @@ public class MessageManager {
             for (Map.Entry<String, String> e : placeholders.entrySet()) {
                 raw = raw.replace("%" + e.getKey() + "%", e.getValue());
             }
-            player.sendMessage(miniMessage.deserialize(getRaw("prefix") + " " + convertLegacyCodes(raw)));
+            player.sendMessage(miniMessage.deserialize(convertLegacyCodes(getRaw("prefix") + " " + raw)));
         }
 
         if (configManager.isMessageActionBarEnabled()) {
