@@ -349,17 +349,17 @@ public class TravelTask extends BukkitRunnable {
 
     /** Calculates and sets boss bar fill: 0→1 ascending, 1→0 descending. */
     private void updateBossBarProgress() {
-        // launchHeight = travel distance from warp surface to peak
-        double launchHeight = config.getLaunchY() + 1.0;
         float progress;
         if (!teleported) {
-            // Ascending: player rises from (source.Y+1) to (source.Y+2+launchY)
-            double startY = Math.floor(source.getY()) + 1.0;
-            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / launchHeight));
+            // Ascending: rises from source.getY() (warp surface) to floor(source.getY())+2+launchY (peak)
+            double startY = source.getY();
+            double endY   = Math.floor(source.getY()) + 2.0 + config.getLaunchY();
+            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / (endY - startY)));
         } else {
-            // Descending: player falls from (dest.Y+2+launchY) back to (dest.Y+1)
-            double destBaseY = Math.floor(destination.getY()) + 1.0;
-            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - destBaseY) / launchHeight));
+            // Descending: falls from floor(dest.getY())+2+launchY (peak) back to dest.getY() (landing)
+            double startY = destination.getY();
+            double endY   = Math.floor(destination.getY()) + 2.0 + config.getLaunchY();
+            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / (endY - startY)));
         }
         travelBossBar.progress(progress);
     }
