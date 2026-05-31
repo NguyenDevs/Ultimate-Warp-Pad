@@ -354,7 +354,7 @@ public class WarpSelectionGUI {
         double relZ = player.getZ() - centerZ;
 
         if (configManager.isCenter()) {
-            player.teleport(new Location(source.getWorld(), centerX, source.getY(), centerZ));
+            player.teleport(new Location(source.getWorld(), centerX, source.getY() + 1, centerZ));
         }
 
         messageManager.send(player, "travel.start");
@@ -364,13 +364,13 @@ public class WarpSelectionGUI {
             if (configManager.isApplyDarkness()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
             }
-            if (configManager.isApplyVanish()) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
-            }
             if (configManager.isApplyGlowing()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+            }
+            if (configManager.isApplyVanish()) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     if (player.isOnline() && player.hasPotionEffect(PotionEffectType.LEVITATION)) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
                     }
                 }, 40L);
             }
@@ -405,7 +405,7 @@ public class WarpSelectionGUI {
             double relZ = member.getZ() - centerZ;
 
             if (configManager.isCenter()) {
-                member.teleport(new Location(source.getWorld(), centerX, source.getY(), centerZ));
+                member.teleport(new Location(source.getWorld(), centerX, source.getY() + 1, centerZ));
             }
 
             final int startOffset = delay;
@@ -419,13 +419,13 @@ public class WarpSelectionGUI {
                 if (configManager.isApplyDarkness()) {
                     member.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
                 }
-                if (configManager.isApplyVanish()) {
-                    member.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
-                }
                 if (configManager.isApplyGlowing()) {
+                    member.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                }
+                if (configManager.isApplyVanish()) {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         if (member.isOnline() && member.hasPotionEffect(PotionEffectType.LEVITATION)) {
-                            member.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                            member.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
                         }
                     }, 40L);
                 }
