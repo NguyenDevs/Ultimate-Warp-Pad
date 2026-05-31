@@ -270,6 +270,7 @@ public class WarpManager {
         int ox = (int) Math.floor(warp.getX()) - 2;
         int oy = (int) Math.floor(warp.getY()) - 2;
         int oz = (int) Math.floor(warp.getZ()) - 2;
+        List<String> terrainSnapshot = WarpSchematicData.captureArea(world, ox, oy, oz);
 
         WarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
         createWorldGuardRegion(warp);
@@ -277,6 +278,7 @@ public class WarpManager {
         warps.put(cid, warp);
         indexWarp(warp);
         database.saveWarp(warp);
+        database.saveTerrainSnapshot(cid, terrainSnapshot);
         return true;
     }
 
@@ -288,12 +290,24 @@ public class WarpManager {
         int oy = (int) Math.floor(warp.getY()) - 2;
         int oz = (int) Math.floor(warp.getZ()) - 2;
 
-        WarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant());
         removeWorldGuardRegion(warp);
-
         removeWarpIndex(warp);
         warps.remove(warp.getCompositeId());
-        database.deleteWarp(warp);
+
+        database.loadTerrainSnapshot(warp.getCompositeId()).thenAccept(snapshot -> {
+            if (!snapshot.isEmpty()) {
+                plugin.getServer().getScheduler().runTask(plugin, () ->
+                        WarpSchematicData.restoreArea(world, ox, oy, oz, snapshot)
+                );
+            } else {
+                plugin.getServer().getScheduler().runTask(plugin, () ->
+                        WarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant())
+                );
+                plugin.getLogger().warning("No terrain snapshot found for warp "
+                        + warp.getCompositeId() + ", falling back to clearArea.");
+            }
+            database.deleteWarp(warp);
+        });
     }
 
     public void saveWarp(Warp warp) {
