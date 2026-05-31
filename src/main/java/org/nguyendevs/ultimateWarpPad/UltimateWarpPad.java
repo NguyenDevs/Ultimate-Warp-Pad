@@ -142,25 +142,24 @@ public final class UltimateWarpPad extends JavaPlugin {
     }
 
     public void printLogo() {
-        var s = Bukkit.getConsoleSender();
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&f   ██╗   ██╗██╗  ████████╗██╗███╗   ███╗ █████╗ ████████╗███████╗"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&f   ██║   ██║██║  ╚══██╔══╝██║████╗ ████║██╔══██╗╚══██╔══╝██╔════╝"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&f   ██║   ██║██║     ██║   ██║██╔████╔██║███████║   ██║   █████╗  "));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&f   ██║   ██║██║     ██║   ██║██║╚██╔╝██║██╔══██║   ██║   ██╔══╝  "));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b   ╚██████╔╝███████╗██║   ██║██║ ╚═╝ ██║██║  ██║   ██║   ███████╗"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b    ╚═════╝ ╚══════╝╚═╝   ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b   ██╗    ██╗ █████╗ ██████╗ ██████╗     ██████╗  █████╗ ██████╗ "));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b   ██║    ██║██╔══██╗██╔══██╗██╔══██╗    ██╔══██╗██╔══██╗██╔══██╗"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3   ██║ █╗ ██║███████║██████╔╝██████╔╝    ██████╔╝███████║██║  ██║"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3   ██║███╗██║██╔══██║██╔══██╗██╔═══╝     ██╔═══╝ ██╔══██║██║  ██║"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3   ╚███╔███╔╝██║  ██║██║  ██║██║         ██║     ██║  ██║██████╔╝"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3    ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝         ╚═╝     ╚═╝  ╚═╝╚═════╝ "));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&4         &fUltimate &bWarp &3Pad"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b         Version " + getDescription().getVersion()));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3         Development by NguyenDevs"));
-        s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
-    }
+    var s = Bukkit.getConsoleSender();
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██╗ &f  ██╗██╗  ████████╗&b██╗███╗   ███╗ ████&3█╗ ████████╗███████╗"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║  &f ██║██║  ╚══██╔══╝█&b█║████╗ ████║██╔══█&3█╗╚══██╔══╝██╔════╝"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║   &f██║██║     ██║   ██&b║██╔████╔██║███████&3║   ██║   █████╗  "));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║   █&f█║██║     ██║   ██║&b██║╚██╔╝██║██╔══██║&3   ██║   ██╔══╝  "));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ╚██████╔&f╝███████╗██║   ██║█&b█║ ╚═╝ ██║██║  ██║ &3  ██║   ███████╗"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8    ╚═════╝ &f╚══════╝╚═╝   ╚═╝╚═&b╝     ╚═╝╚═╝  ╚═╝  &3 ╚═╝   ╚══════╝"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██╗    ██╗ &f█████╗ ██████╗ ████&b██╗     ██████╗  ██&3███╗ ██████╗ "));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║    ██║██&f╔══██╗██╔══██╗██╔══&b██╗    ██╔══██╗██╔═&3═██╗██╔══██╗"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║ █╗ ██║███&f████║██████╔╝██████&b╔╝    ██████╔╝█████&3██║██║  ██║"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ██║███╗██║██╔═&f═██║██╔══██╗██╔═══╝&b     ██╔═══╝ ██╔══█&3█║██║  ██║"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8   ╚███╔███╔╝██║  &f██║██║  ██║██║     &b    ██║     ██║  ██&3║██████╔╝"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8    ╚══╝╚══╝ ╚═╝  ╚&f═╝╚═╝  ╚═╝╚═╝      &b   ╚═╝     ╚═╝  ╚═╝&3╚═════╝ "));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&b         Version " + getDescription().getVersion()));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',"&3         Development by NguyenDevs"));
+    s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));
+}
 }
