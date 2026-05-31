@@ -28,6 +28,8 @@ public class ConfigManager {
     private List<String> disabledWorlds;
     private boolean particleEnabled;
     private Particle particleType;
+    private int idleParticleAmount;
+    private int triggerParticleAmount;
 
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -60,6 +62,8 @@ public class ConfigManager {
         } catch (IllegalArgumentException e) {
             particleType = Particle.FIREWORK;
         }
+        idleParticleAmount = config.getInt("particle.idle_amount", 3);
+        triggerParticleAmount = config.getInt("particle.trigger_amount", 4);
     }
 
     public int getLaunchY() {
@@ -120,6 +124,14 @@ public class ConfigManager {
 
     public Particle getParticleType() {
         return particleType;
+    }
+
+    public int getIdleParticleAmount() {
+        return idleParticleAmount;
+    }
+
+    public int getTriggerParticleAmount() {
+        return triggerParticleAmount;
     }
 
     private void autoUpdateKeys() {

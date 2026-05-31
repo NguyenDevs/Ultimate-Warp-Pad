@@ -74,7 +74,7 @@ public class WarpParticleManager {
         double cy = Math.floor(warp.getY());
         double cz = Math.floor(warp.getZ());
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < configManager.getIdleParticleAmount(); i++) {
             double x = cx - 2 + Math.random() * 5;
             double y = cy + Math.random() * 3;
             double z = cz - 2 + Math.random() * 5;

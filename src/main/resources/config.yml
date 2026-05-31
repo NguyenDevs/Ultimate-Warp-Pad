@@ -23,6 +23,8 @@ effect:
 particle:
   enabled: true
   type: END_ROD
+  idle_amount: 3
+  trigger_amount: 4
 
 max_warps_per_player: 20
 

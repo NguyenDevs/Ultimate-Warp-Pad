@@ -204,7 +204,7 @@ public class TravelTask extends BukkitRunnable {
         convergeTicks++;
         double radius = Math.max(0.2, 3.5 - convergeTicks * 0.12);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < config.getTriggerParticleAmount(); i++) {
             double angle = Math.random() * 2 * Math.PI;
             double x = cx + Math.cos(angle) * radius;
             double z = cz + Math.sin(angle) * radius;
@@ -213,7 +213,7 @@ public class TravelTask extends BukkitRunnable {
         }
 
         if (convergeTicks % 4 == 0) {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < config.getTriggerParticleAmount(); i++) {
                 double angle = Math.random() * 2 * Math.PI;
                 double r = 2.5 + Math.random() * 1.0;
                 double y = cy + Math.random() * 3.0;
