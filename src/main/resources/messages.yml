@@ -98,6 +98,14 @@ gui:
       - "&dAdmin Warps"
       - "&aYour Warps"
       - "&ePublic Warps"
+    settings_shortcut:
+      name: "&bWarp Settings"
+      warp_name: "&7Warp: &f%name%"
+      lore:
+        - " "
+        - "&8Manage this warp pad's settings."
+        - " "
+        - "&a▸ Click to open."
 
   settings:
     title: "<gradient:#55FFFF:#FFFFFF>Warp Settings</gradient>"

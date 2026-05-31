@@ -32,6 +32,7 @@ public class WarpSelectionGUI {
     private static final int SLOT_PREV = 21;
     private static final int SLOT_BEACON = 22;
     private static final int SLOT_NEXT = 23;
+    private static final int SLOT_SETTINGS = 26;
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
@@ -43,6 +44,7 @@ public class WarpSelectionGUI {
     private final Map<UUID, Integer> currentPage;
     private final Map<UUID, Integer> filterMode;
     private final TravelQueue travelQueue;
+    private SettingsGUI settingsGUI;
 
     public WarpSelectionGUI(org.bukkit.plugin.java.JavaPlugin plugin, WarpManager warpManager,
             MessageManager messageManager, ConfigManager configManager,
@@ -57,6 +59,10 @@ public class WarpSelectionGUI {
         this.cooldowns = new HashMap<>();
         this.currentPage = new HashMap<>();
         this.filterMode = new HashMap<>();
+    }
+
+    public void setSettingsGUI(SettingsGUI settingsGUI) {
+        this.settingsGUI = settingsGUI;
     }
 
     public void open(Player player, Warp sourceWarp) {
@@ -102,6 +108,10 @@ public class WarpSelectionGUI {
         }
 
         inv.setItem(SLOT_BEACON, createBeaconItem(player, sourceWarp));
+
+        if (sourceWarp.isOwner(player.getUniqueId())) {
+            inv.setItem(SLOT_SETTINGS, createSettingsShortcutItem(sourceWarp));
+        }
 
         player.openInventory(inv);
         player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f,
@@ -221,6 +231,23 @@ public class WarpSelectionGUI {
         return item;
     }
 
+    private ItemStack createSettingsShortcutItem(Warp warp) {
+        ItemStack item = new ItemStack(Material.PRISMARINE_CRYSTALS);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(messageManager.get("gui.warp_selection.settings_shortcut.name")
+                .decoration(TextDecoration.ITALIC, false));
+        List<Component> lore = new ArrayList<>();
+        lore.add(messageManager.get("gui.warp_selection.settings_shortcut.warp_name",
+                Map.of("name", messageManager.translateColorCodes(warp.getWarpName())))
+                .decoration(TextDecoration.ITALIC, false));
+        lore.addAll(messageManager.getComponentList("gui.warp_selection.settings_shortcut.lore").stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                .toList());
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public boolean handleClick(Player player, int slot) {
         Warp sourceWarp = openSelections.get(player.getUniqueId());
         if (sourceWarp == null)
@@ -255,6 +282,13 @@ public class WarpSelectionGUI {
             if (page < pageCount - 1) {
                 currentPage.put(uuid, page + 1);
                 rebuildGUI(player);
+            }
+            return true;
+        }
+
+        if (slot == SLOT_SETTINGS) {
+            if (sourceWarp.isOwner(player.getUniqueId()) && settingsGUI != null) {
+                settingsGUI.open(player, sourceWarp);
             }
             return true;
         }
