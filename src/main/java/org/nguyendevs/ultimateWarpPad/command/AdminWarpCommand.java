@@ -118,11 +118,17 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (warpManager.getOverlappingWarp(player.getLocation()) != null) {
+        if (warpManager.getOverlappingWarpForAdmin(player.getLocation()) != null) {
             messageManager.send(sender, "warp.overlaps_existing");
             playErrorSound(sender);
             return;
         }
+
+        org.bukkit.Location warpLoc = player.getLocation().clone();
+        org.bukkit.Location tpLoc = warpLoc.clone();
+        tpLoc.setY(tpLoc.getY() + 2);
+        player.teleport(tpLoc);
+        warp.setLocation(warpLoc);
 
         if (warpManager.createWarp(warp)) {
             messageManager.send(sender, "warp.created", Map.of("name", warpName));
