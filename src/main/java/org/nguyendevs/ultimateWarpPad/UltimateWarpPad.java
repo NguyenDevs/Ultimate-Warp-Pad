@@ -37,7 +37,8 @@ public final class UltimateWarpPad extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        getLogger().info("Ultimate Warp Pad is loading...");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aUltimate Warp Pad is loading..."));
 
         configManager = new ConfigManager(this);
         configManager.load();
@@ -49,14 +50,16 @@ public final class UltimateWarpPad extends JavaPlugin {
         databaseManager = new DatabaseManager(this);
         databaseManager.buildWorldCache();
         databaseManager.init().thenRun(() -> {
-            getLogger().info("Database initialized");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aDatabase initialized."));
         });
 
         animationManager = new AnimationManager(this);
 
         warpManager = new WarpManager(this, databaseManager, configManager, animationManager);
         warpManager.loadAllWarps().thenRun(() -> {
-            getLogger().info("All warps loaded");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aAll warps loaded."));
         });
 
         settingsGUI = new SettingsGUI(warpManager, messageManager);
