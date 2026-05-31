@@ -138,7 +138,8 @@ public class WarpManager {
             int ly = location.getBlockY();
             int lz = location.getBlockZ();
             int half = warp.isAdminWarp() ? 3 : 2;
-            if (Math.abs(lx - wx) <= half && Math.abs(ly - wy) <= 1 && Math.abs(lz - wz) <= half) {
+            int halfY = warp.isAdminWarp() ? 2 : 1;
+            if (Math.abs(lx - wx) <= half && Math.abs(ly - wy) <= halfY && Math.abs(lz - wz) <= half) {
                 return warp;
             }
         }
@@ -472,15 +473,13 @@ public class WarpManager {
         int nx = location.getBlockX();
         int ny = location.getBlockY();
         int nz = location.getBlockZ();
-        int newHalf = newIsAdmin ? 3 : 2;
 
         for (Warp existing : warps.values()) {
             if (!existing.getWorld().equals(location.getWorld())) continue;
             int ex = (int) Math.floor(existing.getX());
             int ey = (int) Math.floor(existing.getY());
             int ez = (int) Math.floor(existing.getZ());
-            int existHalf = existing.isAdminWarp() ? 3 : 2;
-            int threshXZ = newHalf + existHalf - 1;
+            int threshXZ = 9;
             int threshY = 2;
 
             if (Math.abs(nx - ex) <= threshXZ && Math.abs(ny - ey) <= threshY && Math.abs(nz - ez) <= threshXZ) {
@@ -491,15 +490,23 @@ public class WarpManager {
     }
 
     public boolean isSkyClear(Location location) {
+        return isSkyClearInternal(location, 1, 1);
+    }
+
+    public boolean isSkyClearForAdmin(Location location) {
+        return isSkyClearInternal(location, 2, 1);
+    }
+
+    private boolean isSkyClearInternal(Location location, int startYOffset, int xzRadius) {
         World world = location.getWorld();
         int bx = location.getBlockX();
         int by = location.getBlockY();
         int bz = location.getBlockZ();
         int maxY = world.getMaxHeight();
 
-        for (int x = bx - 1; x <= bx + 1; x++) {
-            for (int z = bz - 1; z <= bz + 1; z++) {
-                for (int y = by + 1; y < maxY; y++) {
+        for (int x = bx - xzRadius; x <= bx + xzRadius; x++) {
+            for (int z = bz - xzRadius; z <= bz + xzRadius; z++) {
+                for (int y = by + startYOffset; y < maxY; y++) {
                     if (!world.getBlockAt(x, y, z).getType().isAir()) {
                         return false;
                     }
