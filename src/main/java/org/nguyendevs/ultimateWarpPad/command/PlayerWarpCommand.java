@@ -127,6 +127,12 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        org.bukkit.Location warpLoc = player.getLocation().clone();
+        org.bukkit.Location tpLoc = warpLoc.clone();
+        tpLoc.setY(tpLoc.getY() + 1);
+        player.teleport(tpLoc);
+        warp.setLocation(warpLoc);
+
         if (warpManager.createWarp(warp)) {
             messageManager.send(player, "warp.created", Map.of("name", warpName));
             playSuccessSound(player);
