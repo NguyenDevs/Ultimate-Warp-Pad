@@ -45,8 +45,8 @@ public class WarpSelectionGUI {
     private final TravelQueue travelQueue;
 
     public WarpSelectionGUI(org.bukkit.plugin.java.JavaPlugin plugin, WarpManager warpManager,
-                            MessageManager messageManager, ConfigManager configManager,
-                            AnimationManager animationManager, TravelQueue travelQueue) {
+            MessageManager messageManager, ConfigManager configManager,
+            AnimationManager animationManager, TravelQueue travelQueue) {
         this.plugin = plugin;
         this.warpManager = warpManager;
         this.messageManager = messageManager;
@@ -74,14 +74,17 @@ public class WarpSelectionGUI {
     private void rebuildGUI(Player player) {
         UUID uuid = player.getUniqueId();
         Warp sourceWarp = openSelections.get(uuid);
-        if (sourceWarp == null) return;
+        if (sourceWarp == null)
+            return;
 
         List<Warp> allDestinations = getFilteredDestinations(player, sourceWarp);
 
         int page = currentPage.getOrDefault(uuid, 0);
         int totalPages = allDestinations.isEmpty() ? 1 : (allDestinations.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        if (page >= totalPages) page = totalPages - 1;
-        if (page < 0) page = 0;
+        if (page >= totalPages)
+            page = totalPages - 1;
+        if (page < 0)
+            page = 0;
         currentPage.put(uuid, page);
 
         Inventory inv = Bukkit.createInventory(null, 27,
@@ -101,7 +104,8 @@ public class WarpSelectionGUI {
         inv.setItem(SLOT_BEACON, createBeaconItem(player, sourceWarp));
 
         player.openInventory(inv);
-        player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f, 1.0f);
+        player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f,
+                1.0f);
     }
 
     private ItemStack createSimpleItem(Material mat, String namePath) {
@@ -162,8 +166,10 @@ public class WarpSelectionGUI {
 
             return switch (mode) {
                 case 0 -> all.stream().filter(w -> w.getType() == WarpType.ADMIN).collect(Collectors.toList());
-                case 1 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isOwner(uuid)).collect(Collectors.toList());
-                case 2 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isPublic()).collect(Collectors.toList());
+                case 1 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isOwner(uuid))
+                        .collect(Collectors.toList());
+                case 2 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isPublic())
+                        .collect(Collectors.toList());
                 default -> all;
             };
         }
@@ -195,8 +201,8 @@ public class WarpSelectionGUI {
                 .decoration(TextDecoration.ITALIC, false));
 
         Warp costWarp = sourceWarp.isAdminWarp() ? sourceWarp : warp;
-        String lorePath = busy ? "gui.warp_selection.lore.busy" :
-                (costWarp.getCost() < 0 ? "gui.warp_selection.lore.free" : "gui.warp_selection.lore.paid");
+        String lorePath = busy ? "gui.warp_selection.lore.busy"
+                : (costWarp.getCost() < 0 ? "gui.warp_selection.lore.free" : "gui.warp_selection.lore.paid");
 
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("world", warp.getWorld().getName());
@@ -217,7 +223,8 @@ public class WarpSelectionGUI {
 
     public boolean handleClick(Player player, int slot) {
         Warp sourceWarp = openSelections.get(player.getUniqueId());
-        if (sourceWarp == null) return false;
+        if (sourceWarp == null)
+            return false;
 
         player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
 
@@ -252,12 +259,14 @@ public class WarpSelectionGUI {
             return true;
         }
 
-        if (slot < 0 || slot >= ITEMS_PER_PAGE) return true;
+        if (slot < 0 || slot >= ITEMS_PER_PAGE)
+            return true;
 
         int page = currentPage.getOrDefault(player.getUniqueId(), 0);
         List<Warp> destinations = getFilteredDestinations(player, sourceWarp);
         int index = page * ITEMS_PER_PAGE + slot;
-        if (index >= destinations.size()) return true;
+        if (index >= destinations.size())
+            return true;
 
         Warp destination = destinations.get(index);
 
@@ -274,7 +283,8 @@ public class WarpSelectionGUI {
             String costType = costWarp.getCostType().name().toLowerCase();
             int amount = (int) costWarp.getCost();
             int missing = costWarp.getCostType() == CostType.XP
-                    ? warpManager.getMissingXp(player, costWarp) : 0;
+                    ? warpManager.getMissingXp(player, costWarp)
+                    : 0;
             messageManager.send(player, "cost.not_enough_" + costType,
                     Map.of("amount", String.valueOf(amount),
                             "missing", String.valueOf(missing)));
@@ -302,7 +312,8 @@ public class WarpSelectionGUI {
 
     private int getPageCount(Player player) {
         Warp sourceWarp = openSelections.get(player.getUniqueId());
-        if (sourceWarp == null) return 0;
+        if (sourceWarp == null)
+            return 0;
         List<Warp> destinations = getFilteredDestinations(player, sourceWarp);
         return (destinations.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
     }
@@ -332,9 +343,12 @@ public class WarpSelectionGUI {
 
         Location sourceLoc = source.getLocation();
         sourceLoc.getWorld().playSound(sourceLoc, "minecraft:block.beacon.activate", SoundCategory.AMBIENT, 1.0f, 0.5f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:block.beacon.power_select", SoundCategory.AMBIENT, 0.5f, 0.8f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.basalt_deltas.loop", SoundCategory.AMBIENT, 1.0f, 0.5f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.soul_sand_valley.mood", SoundCategory.AMBIENT, 1.0f, 0.5f);
+        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:block.beacon.power_select", SoundCategory.AMBIENT, 0.5f,
+                0.8f);
+        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.basalt_deltas.loop", SoundCategory.AMBIENT, 1.0f,
+                0.5f);
+        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.soul_sand_valley.mood", SoundCategory.AMBIENT,
+                1.0f, 0.5f);
 
         animationManager.playAnimation(source);
 
@@ -358,7 +372,7 @@ public class WarpSelectionGUI {
         if (configManager.isCenter()) {
             Location snapLoc = player.getLocation().clone();
             snapLoc.setX(centerX);
-            snapLoc.setY(source.getY());
+            snapLoc.setY(source.getY() + 0.55);
             snapLoc.setZ(centerZ);
             player.teleport(snapLoc);
         }
@@ -376,7 +390,8 @@ public class WarpSelectionGUI {
             if (configManager.isApplyVanish()) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     if (player.isOnline() && player.hasPotionEffect(PotionEffectType.LEVITATION)) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
+                        player.addPotionEffect(
+                                new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
                     }
                 }, 40L);
             }
@@ -392,7 +407,8 @@ public class WarpSelectionGUI {
         Set<Player> group = new HashSet<>();
         group.add(clicker);
         for (Player nearby : source.getWorld().getPlayers()) {
-            if (nearby.equals(clicker)) continue;
+            if (nearby.equals(clicker))
+                continue;
             if (Math.abs(nearby.getLocation().getBlockX() - bx) <= 1
                     && Math.abs(nearby.getLocation().getBlockZ() - bz) <= 1) {
                 group.add(nearby);
@@ -413,7 +429,7 @@ public class WarpSelectionGUI {
             if (configManager.isCenter()) {
                 Location snapLoc = member.getLocation().clone();
                 snapLoc.setX(centerX);
-                snapLoc.setY(source.getY());
+                snapLoc.setY(source.getY() + 0.55);
                 snapLoc.setZ(centerZ);
                 member.teleport(snapLoc);
             }
@@ -427,15 +443,18 @@ public class WarpSelectionGUI {
                 }
                 member.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 150, 0, false, false));
                 if (configManager.isApplyDarkness()) {
-                    member.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
+                    member.addPotionEffect(
+                            new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
                 }
                 if (configManager.isApplyGlowing()) {
-                    member.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                    member.addPotionEffect(
+                            new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
                 }
                 if (configManager.isApplyVanish()) {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         if (member.isOnline() && member.hasPotionEffect(PotionEffectType.LEVITATION)) {
-                            member.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
+                            member.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0,
+                                    false, false));
                         }
                     }, 40L);
                 }
