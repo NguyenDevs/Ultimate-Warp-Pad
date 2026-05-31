@@ -16,7 +16,7 @@ warp:
   trust_removed: "&7%player% &7can no longer use this warp."
   not_owner: "&cYou do not own this warp pad."
   invalid_id: "&cWarp ID must be alphanumeric."
-  overlaps_existing: "&cToo close to another warp pad! Keep at least 5 blocks away."
+  overlaps_existing: "&cToo close to another warp pad! Keep at least 10 blocks away."
 
 cost:
   not_enough_xp: "&cYou &eneed %amount% &cXP. You're missing &e%missing% &cXP."
