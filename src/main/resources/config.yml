@@ -22,7 +22,7 @@ effect:
 
 particle:
   enabled: true
-  type: FIREWORK
+  type: END_ROD
 
 max_warps_per_player: 20
 
