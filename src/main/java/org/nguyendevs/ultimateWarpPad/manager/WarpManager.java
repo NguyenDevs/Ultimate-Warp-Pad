@@ -51,10 +51,11 @@ public class WarpManager {
     private void indexWarp(Warp warp) {
         int bx = (int) Math.floor(warp.getX());
         int bz = (int) Math.floor(warp.getZ());
-        int minCX = (bx - 2) >> 4;
-        int maxCX = (bx + 2) >> 4;
-        int minCZ = (bz - 2) >> 4;
-        int maxCZ = (bz + 2) >> 4;
+        int half = warp.isAdminWarp() ? 3 : 2;
+        int minCX = (bx - half) >> 4;
+        int maxCX = (bx + half) >> 4;
+        int minCZ = (bz - half) >> 4;
+        int maxCZ = (bz + half) >> 4;
 
         for (int cx = minCX; cx <= maxCX; cx++) {
             for (int cz = minCZ; cz <= maxCZ; cz++) {
@@ -66,10 +67,11 @@ public class WarpManager {
     private void removeWarpIndex(Warp warp) {
         int bx = (int) Math.floor(warp.getX());
         int bz = (int) Math.floor(warp.getZ());
-        int minCX = (bx - 2) >> 4;
-        int maxCX = (bx + 2) >> 4;
-        int minCZ = (bz - 2) >> 4;
-        int maxCZ = (bz + 2) >> 4;
+        int half = warp.isAdminWarp() ? 3 : 2;
+        int minCX = (bx - half) >> 4;
+        int maxCX = (bx + half) >> 4;
+        int minCZ = (bz - half) >> 4;
+        int maxCZ = (bz + half) >> 4;
 
         for (int cx = minCX; cx <= maxCX; cx++) {
             for (int cz = minCZ; cz <= maxCZ; cz++) {
@@ -135,7 +137,8 @@ public class WarpManager {
             int lx = location.getBlockX();
             int ly = location.getBlockY();
             int lz = location.getBlockZ();
-            if (Math.abs(lx - wx) <= 2 && Math.abs(ly - wy) <= 1 && Math.abs(lz - wz) <= 2) {
+            int half = warp.isAdminWarp() ? 3 : 2;
+            if (Math.abs(lx - wx) <= half && Math.abs(ly - wy) <= 1 && Math.abs(lz - wz) <= half) {
                 return warp;
             }
         }
