@@ -330,6 +330,14 @@ public class DatabaseManager {
         }
         try {
             if (connection != null && !connection.isClosed()) {
+                String type = plugin.getConfig().getString("database.type", "sqlite");
+                if (type.equalsIgnoreCase("sqlite")) {
+                    try (Statement stmt = connection.createStatement()) {
+                        stmt.execute("VACUUM");
+                    } catch (SQLException e) {
+                        plugin.getLogger().warning("Failed to VACUUM database: " + e.getMessage());
+                    }
+                }
                 connection.close();
             }
         } catch (SQLException e) {
