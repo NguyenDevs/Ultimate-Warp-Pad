@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
+import org.nguyendevs.ultimateWarpPad.schematic.AdminWarpSchematicData;
 import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
 
 import java.util.*;
@@ -58,9 +59,10 @@ public class AnimationManager {
 
         activeCount++;
 
-        int ox = (int) Math.floor(warp.getX()) - 2;
-        int oy = (int) Math.floor(warp.getY()) - 2;
-        int oz = (int) Math.floor(warp.getZ()) - 2;
+        boolean isAdmin = warp.isAdminWarp();
+        int ox = (int) Math.floor(warp.getX()) - (isAdmin ? 3 : 2);
+        int oy = (int) Math.floor(warp.getY()) - (isAdmin ? 1 : 2);
+        int oz = (int) Math.floor(warp.getZ()) - (isAdmin ? 3 : 2);
 
         BukkitTask task = new BukkitRunnable() {
             int phase = 0;
@@ -69,7 +71,11 @@ public class AnimationManager {
             @Override
             public void run() {
                 if (phase >= START_SEQUENCE.length) {
-                    WarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
+                    if (isAdmin) {
+                        AdminWarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
+                    } else {
+                        WarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
+                    }
                     activeAnimations.remove(warp.getCompositeId());
                     activeCount--;
                     processQueue();
@@ -82,7 +88,11 @@ public class AnimationManager {
                 int duration = seq[1];
 
                 if (tick == 0) {
-                    WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    if (isAdmin) {
+                        AdminWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    } else {
+                        WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    }
                 }
 
                 tick++;
@@ -115,9 +125,10 @@ public class AnimationManager {
         World world = warp.getWorld();
         if (world == null) return;
 
-        int ox = (int) Math.floor(warp.getX()) - 2;
-        int oy = (int) Math.floor(warp.getY()) - 2;
-        int oz = (int) Math.floor(warp.getZ()) - 2;
+        boolean isAdmin = warp.isAdminWarp();
+        int ox = (int) Math.floor(warp.getX()) - (isAdmin ? 3 : 2);
+        int oy = (int) Math.floor(warp.getY()) - (isAdmin ? 1 : 2);
+        int oz = (int) Math.floor(warp.getZ()) - (isAdmin ? 3 : 2);
 
         BukkitTask task = new BukkitRunnable() {
             int phase = 0;
@@ -136,7 +147,11 @@ public class AnimationManager {
                 int duration = seq[1];
 
                 if (tick == 0) {
-                    WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    if (isAdmin) {
+                        AdminWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    } else {
+                        WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                    }
                 }
 
                 tick++;
