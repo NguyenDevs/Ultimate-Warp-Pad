@@ -425,6 +425,24 @@ public class WarpManager {
         return result.toString();
     }
 
+    public Warp getOverlappingWarp(Location location) {
+        int nx = location.getBlockX();
+        int ny = location.getBlockY();
+        int nz = location.getBlockZ();
+
+        for (Warp existing : warps.values()) {
+            if (!existing.getWorld().equals(location.getWorld())) continue;
+            int ex = (int) Math.floor(existing.getX());
+            int ey = (int) Math.floor(existing.getY());
+            int ez = (int) Math.floor(existing.getZ());
+
+            if (Math.abs(nx - ex) <= 4 && Math.abs(ny - ey) <= 2 && Math.abs(nz - ez) <= 4) {
+                return existing;
+            }
+        }
+        return null;
+    }
+
     public boolean isSkyClear(Location location) {
         World world = location.getWorld();
         int bx = location.getBlockX();
