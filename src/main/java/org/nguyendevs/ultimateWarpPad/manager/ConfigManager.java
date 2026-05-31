@@ -30,6 +30,10 @@ public class ConfigManager {
     private Particle particleType;
     private int idleParticleAmount;
     private int triggerParticleAmount;
+    private boolean messageChatEnabled;
+    private boolean messageActionBarEnabled;
+    private boolean messageBossBarEnabled;
+    private boolean messageTitleEnabled;
 
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -64,6 +68,10 @@ public class ConfigManager {
         }
         idleParticleAmount = config.getInt("particle.idle_amount", 3);
         triggerParticleAmount = config.getInt("particle.trigger_amount", 4);
+        messageChatEnabled = config.getBoolean("message.chat", true);
+        messageActionBarEnabled = config.getBoolean("message.action_bar", false);
+        messageBossBarEnabled = config.getBoolean("message.boss_bar", false);
+        messageTitleEnabled = config.getBoolean("message.title", false);
     }
 
     public int getLaunchY() {
@@ -132,6 +140,22 @@ public class ConfigManager {
 
     public int getTriggerParticleAmount() {
         return triggerParticleAmount;
+    }
+
+    public boolean isMessageChatEnabled() {
+        return messageChatEnabled;
+    }
+
+    public boolean isMessageActionBarEnabled() {
+        return messageActionBarEnabled;
+    }
+
+    public boolean isMessageBossBarEnabled() {
+        return messageBossBarEnabled;
+    }
+
+    public boolean isMessageTitleEnabled() {
+        return messageTitleEnabled;
     }
 
     private void autoUpdateKeys() {

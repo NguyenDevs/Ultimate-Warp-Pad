@@ -287,7 +287,7 @@ public class WarpSelectionGUI {
             long elapsed = (System.currentTimeMillis() - last) / 1000;
             if (elapsed < cd) {
                 travelQueue.onComplete(destination);
-                messageManager.send(player, "travel.cooldown",
+                messageManager.sendTravel(player, "cooldown",
                         Map.of("time", String.valueOf(cd - elapsed)));
                 return true;
             }
@@ -363,7 +363,7 @@ public class WarpSelectionGUI {
             player.teleport(snapLoc);
         }
 
-        messageManager.send(player, "travel.start");
+        messageManager.sendTravel(player, "start");
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 150, 0, false, false));
@@ -439,7 +439,7 @@ public class WarpSelectionGUI {
                         }
                     }, 40L);
                 }
-                messageManager.send(member, "travel.start");
+                messageManager.sendTravel(member, "start");
                 new TravelTask(plugin, member, source, destination, configManager,
                         animationManager, messageManager, session, travelQueue, relX, relZ)
                         .runTaskTimer(plugin, 0L, 1L);

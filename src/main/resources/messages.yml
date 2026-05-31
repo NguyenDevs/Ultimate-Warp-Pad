@@ -24,11 +24,33 @@ cost:
   deducted_xp: "&8Spent &7%amount% XP."
   deducted_money: "&8Paid &7$%amount%."
 
-travel:
+travel_chat:
   start: "&7Warping..."
   arrived: "&aArrived at &f%destination%."
   cancelled: "&cWarp cancelled."
   cooldown: "&cPlease wait &e%time%s before warping again."
+
+travel_action_bar:
+  start: "&7Warping..."
+  arrived: "&aArrived at &f%destination%."
+  cancelled: "&cWarp cancelled."
+  cooldown: "&cPlease wait &e%time%s before warping again."
+
+travel_boss_bar:
+  start: "&7Warping..."
+  arrived: "&aArrived at &f%destination%."
+  cancelled: "&cWarp cancelled."
+  cooldown: "&cPlease wait &e%time%s before warping again."
+
+travel_title:
+  start: "&fWarping"
+  start_st: "&7Please stand still..."
+  arrived: "&aArrived!"
+  arrived_st: "&f%destination%"
+  cancelled: "&cCancelled"
+  cancelled_st: "&7Warp was cancelled."
+  cooldown: "&cCooldown"
+  cooldown_st: "&7Please wait &e%time%s."
 
 gui:
   warp_selection:

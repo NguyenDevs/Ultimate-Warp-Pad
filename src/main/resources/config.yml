@@ -20,6 +20,12 @@ effect:
   apply_vanish: true
   apply_glowing: true
 
+message:
+  chat: true
+  action_bar: false
+  boss_bar: false
+  title: false
+
 particle:
   enabled: true
   type: END_ROD

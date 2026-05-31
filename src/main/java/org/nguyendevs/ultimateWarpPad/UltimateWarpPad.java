@@ -44,6 +44,7 @@ public final class UltimateWarpPad extends JavaPlugin {
 
         messageManager = new MessageManager(this);
         messageManager.load();
+        messageManager.setConfigManager(configManager);
 
         databaseManager = new DatabaseManager(this);
         databaseManager.buildWorldCache();

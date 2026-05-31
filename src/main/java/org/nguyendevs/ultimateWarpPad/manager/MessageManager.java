@@ -1,8 +1,11 @@
 package org.nguyendevs.ultimateWarpPad.manager;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -12,6 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +24,7 @@ public class MessageManager {
 
     private final JavaPlugin plugin;
     private final MiniMessage miniMessage;
+    private ConfigManager configManager;
     private YamlConfiguration messages;
     private String prefix;
 
@@ -130,6 +135,69 @@ public class MessageManager {
 
     public void sendRaw(Player player, String path, Map<String, String> placeholders) {
         player.sendMessage(get(path, placeholders));
+    }
+
+    /** Called after ConfigManager is ready so sendTravel can read channel flags. */
+    public void setConfigManager(ConfigManager configManager) {
+        this.configManager = configManager;
+    }
+
+    /**
+     * Sends a travel message (start/arrived/cancelled/cooldown) through all
+     * channels enabled in config.yml under the message.* section.
+     * The key is the sub-key (e.g. "start", "arrived").
+     */
+    public void sendTravel(Player player, String key, Map<String, String> placeholders) {
+        if (configManager == null) {
+            send(player, "travel_chat." + key, placeholders);
+            return;
+        }
+
+        if (configManager.isMessageChatEnabled()) {
+            String raw = getRaw("travel_chat." + key);
+            for (Map.Entry<String, String> e : placeholders.entrySet()) {
+                raw = raw.replace("%" + e.getKey() + "%", e.getValue());
+            }
+            player.sendMessage(miniMessage.deserialize(getRaw("prefix") + " " + convertLegacyCodes(raw)));
+        }
+
+        if (configManager.isMessageActionBarEnabled()) {
+            String raw = getRaw("travel_action_bar." + key);
+            for (Map.Entry<String, String> e : placeholders.entrySet()) {
+                raw = raw.replace("%" + e.getKey() + "%", e.getValue());
+            }
+            player.sendActionBar(miniMessage.deserialize(convertLegacyCodes(raw)));
+        }
+
+        if (configManager.isMessageBossBarEnabled()) {
+            String raw = getRaw("travel_boss_bar." + key);
+            for (Map.Entry<String, String> e : placeholders.entrySet()) {
+                raw = raw.replace("%" + e.getKey() + "%", e.getValue());
+            }
+            Component bossText = miniMessage.deserialize(convertLegacyCodes(raw));
+            BossBar bar = BossBar.bossBar(bossText, 1.0f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
+            player.showBossBar(bar);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> player.hideBossBar(bar), 60L);
+        }
+
+        if (configManager.isMessageTitleEnabled()) {
+            String titleRaw = getRaw("travel_title." + key);
+            String subRaw = getRaw("travel_title." + key + "_st");
+            for (Map.Entry<String, String> e : placeholders.entrySet()) {
+                titleRaw = titleRaw.replace("%" + e.getKey() + "%", e.getValue());
+                subRaw = subRaw.replace("%" + e.getKey() + "%", e.getValue());
+            }
+            Component titleComp = miniMessage.deserialize(convertLegacyCodes(titleRaw));
+            Component subComp = subRaw.isEmpty() ? Component.empty()
+                    : miniMessage.deserialize(convertLegacyCodes(subRaw));
+            Title.Times times = Title.Times.times(
+                    Duration.ofMillis(200), Duration.ofMillis(2000), Duration.ofMillis(500));
+            player.showTitle(Title.title(titleComp, subComp, times));
+        }
+    }
+
+    public void sendTravel(Player player, String key) {
+        sendTravel(player, key, Map.of());
     }
 
     public Component formatColored(String text) {

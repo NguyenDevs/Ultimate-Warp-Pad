@@ -91,7 +91,7 @@ public class TravelTask extends BukkitRunnable {
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
                 player.removePotionEffect(PotionEffectType.GLOWING);
                 UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
-                messageManager.send(player, "travel.cancelled");
+                messageManager.sendTravel(player, "cancelled");
                 playCancelSound();
                 if (session != null) {
                     session.removePlayer(player);
@@ -288,7 +288,7 @@ public class TravelTask extends BukkitRunnable {
         } else {
             animationManager.playLandingAnimation(destination);
         }
-        messageManager.send(player, "travel.arrived",
+        messageManager.sendTravel(player, "arrived",
                 Map.of("destination", destination.getWarpName()));
         if (session == null) travelQueue.onComplete(destination);
         this.cancel();
@@ -303,7 +303,7 @@ public class TravelTask extends BukkitRunnable {
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
-        messageManager.send(player, "travel.cancelled");
+        messageManager.sendTravel(player, "cancelled");
         playCancelSound();
         if (session != null) {
             session.removePlayer(player);
@@ -315,7 +315,7 @@ public class TravelTask extends BukkitRunnable {
     private void cleanup() {
         if (!landed) {
             UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
-            messageManager.send(player, "travel.cancelled");
+            messageManager.sendTravel(player, "cancelled");
             playCancelSound();
             if (session == null) travelQueue.onComplete(destination);
         }
