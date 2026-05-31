@@ -413,7 +413,7 @@ public class WarpSelectionGUI {
         if (configManager.isCenter()) {
             Location snapLoc = player.getLocation().clone();
             snapLoc.setX(centerX);
-            snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 0.55));
+            snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 1));
             snapLoc.setZ(centerZ);
             player.teleport(snapLoc);
         }
@@ -470,7 +470,7 @@ public class WarpSelectionGUI {
             if (configManager.isCenter()) {
                 Location snapLoc = member.getLocation().clone();
                 snapLoc.setX(centerX);
-                snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 0.55));
+                snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 1));
                 snapLoc.setZ(centerZ);
                 member.teleport(snapLoc);
             }
