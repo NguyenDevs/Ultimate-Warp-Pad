@@ -199,5 +199,5 @@ error:
   worldguard_not_found: "&cWorldGuard is not installed."
   player_not_found: "&cPlayer &e%player% not found."
   disabled_world: "&cWarp pads are disabled in this world."
-  blocked_above: "&cThe sky above the warp pad is blocked! Clear the 3x3 area above it first."
+  blocked_above: "&cThe sky above the warp pad is blocked! Clear the area above it first."
   dest_blocked: "&cThe destination warp's sky is blocked! Cannot teleport."
