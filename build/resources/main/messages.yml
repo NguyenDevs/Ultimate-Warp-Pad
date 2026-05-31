@@ -1,0 +1,172 @@
+prefix: "<gradient:#55FFFF:#FFFFFF>UltimateWarpPad</gradient> &8|"
+
+warp:
+  created: "&aWarp &f%name% created."
+  deleted: "&aWarp &f%id% deleted."
+  not_found: "&cWarp &e%id% not found."
+  not_found_standing: "&cStand on a warp pad or specify an ID."
+  already_exists: "&cWarp ID &e%id% already exists."
+  max_reached: "&cMaximum warp limit reached &7(%max%)."
+  name_changed: "&aRenamed to &f%name%."
+  visibility_changed: "&aVisibility set to &f%visibility%."
+  range_changed: "&aRange set to &f%range%."
+  icon_changed: "&aIcon updated."
+  cost_changed: "&aCost updated: &f%old% → &f%new%."
+  trust_added: "&a%player% &acan now use this warp."
+  trust_removed: "&7%player% &7can no longer use this warp."
+  not_owner: "&cYou do not own this warp pad."
+  invalid_id: "&cWarp ID must be alphanumeric."
+
+cost:
+  not_enough_xp: "&cYou &eneed %amount% &cXP. You're missing &e%missing% &cXP."
+  not_enough_money: "&cYou need &e$%amount%."
+  vault_not_found: "&cVault economy plugin not found."
+  deducted_xp: "&8Spent &7%amount% XP."
+  deducted_money: "&8Paid &7$%amount%."
+
+travel:
+  start: "&7Warping..."
+  arrived: "&aArrived at &f%destination%."
+  cancelled: "&cWarp cancelled."
+  cooldown: "&cPlease wait &e%time%s before warping again."
+
+gui:
+  warp_selection:
+    title: "<gradient:#55FFFF:#FFFFFF>Select Destination</gradient>"
+    lore:
+      paid:
+        - " "
+        - "&7World: &a%world%"
+        - "&7Coord: &a%x%&7, &a%y%&7, &a%z%"
+        - "&7Cost: &a%amount% %type%"
+        - " "
+        - "&a▸ Click to teleport"
+      free:
+        - " "
+        - "&7World: &a%world%"
+        - "&7Coord: &a%x%&7, &a%y%&7, &a%z%"
+        - "&7Cost: &aFree"
+        - " "
+        - "&a▸ Click to teleport"
+      busy:
+        - " "
+        - "&7World: &a%world%"
+        - "&7Coord: &a%x%&7, &a%y%&7, &a%z%"
+        - " "
+        - "&c⚠ Warp is being used"
+    no_destinations: "&cNo destinations available within range."
+    warp_busy: "&cThis warp is currently being used. You have been queued."
+    page_previous: "&7← Previous"
+    page_next: "&7Next →"
+    beacon:
+      admin_name: "<gradient:#55FFFF:#FFFFFF>Filter Mode</gradient>"
+      admin_lore:
+        - "&7Current: &f%mode%"
+        - " "
+        - "&8▸ &8Admin warps"
+        - "&8▸ &8Your warps"
+        - "&8▸ &8Public warps"
+        - " "
+        - "&a▸ Click to switch"
+      player_name: "<gradient:#55FFFF:#FFFFFF>Warp Info</gradient>"
+      player_lore:
+        - "&7Showing: &f%type%"
+        - "&8Only warps within range are listed"
+    filter_modes:
+      - "&dAdmin Warps"
+      - "&aYour Warps"
+      - "&ePublic Warps"
+
+  settings:
+    title: "<gradient:#55FFFF:#FFFFFF>Warp Settings</gradient>"
+    public_toggle:
+      name: "&6Visibility"
+      public: "&7Status: &aPublic"
+      private: "&7Status: &cPrivate"
+      lore:
+        - " "
+        - "&7Public: &8visible to all nearby players."
+        - "&7Private: &8only you and trusted players."
+        - " "
+        - "&a▸ Click to toggle."
+    name:
+      name: "&6Name"
+      current: "&7Current: &a%name%"
+      lore:
+        - " "
+        - "&8Shown in the destination list."
+        - " "
+        - "&a▸ Click to rename."
+    range:
+      name: "&6Active Range"
+      current: "&7Current: &a%range%"
+      lore:
+        - " "
+        - "&8Players outside this range won't see"
+        - "&8this warp in the selection GUI."
+        - " "
+        - "&a▸ Click to switch."
+      unlimited: "&3Unlimited"
+      blocks: "&f%range% &7blocks."
+    cost:
+      name: "&6Warp Cost"
+      type_line: "&7Type: &a%type%"
+      amount_line: "&7Amount: &6%amount%"
+      lore:
+        - " "
+        - "&8Charged each time a player teleports."
+        - "&a▸ Left-click: &7Switch type"
+        - "&a▸ Right-click: &7Set custom amount"
+      free: "&7Cost: &aFree"
+    delete:
+      name: "&cDelete Warp"
+      lore:
+        - " "
+        - "&cPermanently removes this warp pad."
+        - "&8You will be asked to confirm first."
+        - " "
+        - "&a▸ Click to proceed"
+    icon:
+      name: "&6Warp Icon"
+      lore:
+        - " "
+        - "&8Shown in the destination selection GUI."
+        - " "
+        - "&a▸ Click to select"
+
+  icon_selection:
+    title: "<gradient:#55FFFF:#FFFFFF>Select Icon</gradient>"
+    page_previous: "&7← Previous"
+    page_next: "&7Next →"
+    info: "&7Click any item to use it as the warp icon."
+
+  help:
+    - "<gradient:#55FFFF:#FFFFFF>Ultimate Warp Pad Help</gradient>"
+    - ""
+    - "&a/wpp create <id> [name] &7- Create a personal warp"
+    - "&a/wpp delete <id> &7- Delete a personal warp"
+    - "&a/wpp setting [id] &7- Open warp settings"
+    - "&a/wpp trust <id> <player> &7- Trust/untrust a player"
+    - "&a/wpp help &7- Show this help"
+
+prompt:
+  enter_name: "&eEnter a new warp name. &7Use & for colors. &eType &c'cancel' &eto cancel."
+  enter_name_cancelled: "&cName change cancelled."
+  enter_name_saved: "&aWarp name saved."
+  enter_cost_amount: "&eEnter the cost amount."
+  invalid_cost_amount: "&cInvalid number."
+  delete_confirm: "&cType &econfirm &cto delete or &ecancel &cto abort."
+  delete_cancelled: "&aDeletion cancelled."
+
+config:
+  reloaded: "&aConfiguration reloaded successfully."
+
+error:
+  permission: "&cYou do not have permission to do that."
+  player_only: "&cThis command can only be used by players."
+  invalid_syntax: "&cUsage: &e%usage%"
+  worldguard_not_found: "&cWorldGuard is not installed."
+  player_not_found: "&cPlayer &e%player% not found."
+  disabled_world: "&cWarp pads are disabled in this world."
+  blocked_above: "&cThe sky above the warp pad is blocked! Clear the 3x3 area above it first."
+  dest_blocked: "&cThe destination warp's sky is blocked! Cannot teleport."
