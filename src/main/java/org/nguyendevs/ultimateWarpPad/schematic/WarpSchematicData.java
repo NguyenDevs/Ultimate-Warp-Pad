@@ -5,6 +5,9 @@ import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WarpSchematicData {
 
     public static class SchematicData {
@@ -307,6 +310,36 @@ public class WarpSchematicData {
             for (int z = 0; z < L; z++) {
                 for (int x = 0; x < W; x++) {
                     world.getBlockAt(ox + x, oy + y, oz + z).setType(Material.AIR, false);
+                }
+            }
+        }
+    }
+
+    public static List<String> captureArea(World world, int ox, int oy, int oz) {
+        List<String> snapshot = new ArrayList<>(W * H * L);
+        for (int y = 0; y < H; y++) {
+            for (int z = 0; z < L; z++) {
+                for (int x = 0; x < W; x++) {
+                    snapshot.add(world.getBlockAt(ox + x, oy + y, oz + z).getBlockData().getAsString());
+                }
+            }
+        }
+        return snapshot;
+    }
+
+    public static void restoreArea(World world, int ox, int oy, int oz, List<String> snapshot) {
+        if (snapshot == null || snapshot.size() != W * H * L) return;
+        int idx = 0;
+        for (int y = 0; y < H; y++) {
+            for (int z = 0; z < L; z++) {
+                for (int x = 0; x < W; x++) {
+                    try {
+                        BlockData bd = Bukkit.createBlockData(snapshot.get(idx));
+                        world.getBlockAt(ox + x, oy + y, oz + z).setBlockData(bd, false);
+                    } catch (Exception e) {
+                        world.getBlockAt(ox + x, oy + y, oz + z).setType(Material.AIR, false);
+                    }
+                    idx++;
                 }
             }
         }
