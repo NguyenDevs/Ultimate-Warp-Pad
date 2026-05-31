@@ -17,6 +17,7 @@ import org.nguyendevs.ultimateWarpPad.database.DatabaseManager;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
 import org.nguyendevs.ultimateWarpPad.model.WarpType;
+import org.nguyendevs.ultimateWarpPad.schematic.AdminWarpSchematicData;
 import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
 
 import java.util.*;
@@ -267,18 +268,30 @@ public class WarpManager {
         warp.setSchematicVariant(0);
 
         World world = warp.getWorld();
-        int ox = (int) Math.floor(warp.getX()) - 2;
-        int oy = (int) Math.floor(warp.getY()) - 2;
-        int oz = (int) Math.floor(warp.getZ()) - 2;
-        List<String> terrainSnapshot = WarpSchematicData.captureArea(world, ox, oy, oz);
+        int cx = (int) Math.floor(warp.getX());
+        int cy = (int) Math.floor(warp.getY());
+        int cz = (int) Math.floor(warp.getZ());
 
-        WarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
+        if (warp.isAdminWarp()) {
+            int ox = cx - 3;
+            int oy = cy - 1;
+            int oz = cz - 3;
+            List<String> terrainSnapshot = AdminWarpSchematicData.captureArea(world, ox, oy, oz);
+            AdminWarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
+            database.saveTerrainSnapshot(cid, terrainSnapshot);
+        } else {
+            int ox = cx - 2;
+            int oy = cy - 2;
+            int oz = cz - 2;
+            List<String> terrainSnapshot = WarpSchematicData.captureArea(world, ox, oy, oz);
+            WarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
+            database.saveTerrainSnapshot(cid, terrainSnapshot);
+        }
+
         createWorldGuardRegion(warp);
-
         warps.put(cid, warp);
         indexWarp(warp);
         database.saveWarp(warp);
-        database.saveTerrainSnapshot(cid, terrainSnapshot);
         return true;
     }
 
@@ -286,9 +299,14 @@ public class WarpManager {
         animationManager.cancelAnimation(warp);
 
         World world = warp.getWorld();
-        int ox = (int) Math.floor(warp.getX()) - 2;
-        int oy = (int) Math.floor(warp.getY()) - 2;
-        int oz = (int) Math.floor(warp.getZ()) - 2;
+        int cx = (int) Math.floor(warp.getX());
+        int cy = (int) Math.floor(warp.getY());
+        int cz = (int) Math.floor(warp.getZ());
+
+        boolean isAdmin = warp.isAdminWarp();
+        int ox = cx - (isAdmin ? 3 : 2);
+        int oy = cy - (isAdmin ? 1 : 2);
+        int oz = cz - (isAdmin ? 3 : 2);
 
         removeWorldGuardRegion(warp);
         removeWarpIndex(warp);
@@ -296,13 +314,21 @@ public class WarpManager {
 
         database.loadTerrainSnapshot(warp.getCompositeId()).thenAccept(snapshot -> {
             if (!snapshot.isEmpty()) {
-                plugin.getServer().getScheduler().runTask(plugin, () ->
-                        WarpSchematicData.restoreArea(world, ox, oy, oz, snapshot)
-                );
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    if (isAdmin) {
+                        AdminWarpSchematicData.restoreArea(world, ox, oy, oz, snapshot);
+                    } else {
+                        WarpSchematicData.restoreArea(world, ox, oy, oz, snapshot);
+                    }
+                });
             } else {
-                plugin.getServer().getScheduler().runTask(plugin, () ->
-                        WarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant())
-                );
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    if (isAdmin) {
+                        AdminWarpSchematicData.clearArea(world, ox, oy, oz);
+                    } else {
+                        WarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant());
+                    }
+                });
                 plugin.getLogger().warning("No terrain snapshot found for warp "
                         + warp.getCompositeId() + ", falling back to clearArea.");
             }
@@ -327,8 +353,14 @@ public class WarpManager {
             int y = (int) Math.floor(warp.getY());
             int z = (int) Math.floor(warp.getZ());
 
-            BlockVector3 min = BlockVector3.at(x - 2, y - 2, z - 2);
-            BlockVector3 max = BlockVector3.at(x + 2, y, z + 2);
+            BlockVector3 min, max;
+            if (warp.isAdminWarp()) {
+                min = BlockVector3.at(x - 3, y - 1, z - 3);
+                max = BlockVector3.at(x + 3, y + 1, z + 3);
+            } else {
+                min = BlockVector3.at(x - 2, y - 2, z - 2);
+                max = BlockVector3.at(x + 2, y, z + 2);
+            }
             ProtectedCuboidRegion region = new ProtectedCuboidRegion(regionName, min, max);
 
             region.setFlag(Flags.BLOCK_BREAK, StateFlag.State.DENY);
@@ -426,17 +458,29 @@ public class WarpManager {
     }
 
     public Warp getOverlappingWarp(Location location) {
+        return getOverlappingWarpInternal(location, false);
+    }
+
+    public Warp getOverlappingWarpForAdmin(Location location) {
+        return getOverlappingWarpInternal(location, true);
+    }
+
+    private Warp getOverlappingWarpInternal(Location location, boolean newIsAdmin) {
         int nx = location.getBlockX();
         int ny = location.getBlockY();
         int nz = location.getBlockZ();
+        int newHalf = newIsAdmin ? 3 : 2;
 
         for (Warp existing : warps.values()) {
             if (!existing.getWorld().equals(location.getWorld())) continue;
             int ex = (int) Math.floor(existing.getX());
             int ey = (int) Math.floor(existing.getY());
             int ez = (int) Math.floor(existing.getZ());
+            int existHalf = existing.isAdminWarp() ? 3 : 2;
+            int threshXZ = newHalf + existHalf - 1;
+            int threshY = 2;
 
-            if (Math.abs(nx - ex) <= 4 && Math.abs(ny - ey) <= 2 && Math.abs(nz - ez) <= 4) {
+            if (Math.abs(nx - ex) <= threshXZ && Math.abs(ny - ey) <= threshY && Math.abs(nz - ez) <= threshXZ) {
                 return existing;
             }
         }
