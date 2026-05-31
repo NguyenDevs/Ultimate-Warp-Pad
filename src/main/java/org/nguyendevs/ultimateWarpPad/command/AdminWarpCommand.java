@@ -25,7 +25,8 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
     private final MessageManager messageManager;
     private final SettingsGUI settingsGUI;
 
-    public AdminWarpCommand(WarpManager warpManager, ConfigManager configManager, MessageManager messageManager, SettingsGUI settingsGUI) {
+    public AdminWarpCommand(WarpManager warpManager, ConfigManager configManager, MessageManager messageManager,
+            SettingsGUI settingsGUI) {
         this.warpManager = warpManager;
         this.configManager = configManager;
         this.messageManager = messageManager;
@@ -209,7 +210,8 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("uwp.admin")) return Collections.emptyList();
+        if (!sender.hasPermission("uwp.admin"))
+            return Collections.emptyList();
 
         if (args.length == 1) {
             return List.of("reload", "create", "delete", "setting").stream()
