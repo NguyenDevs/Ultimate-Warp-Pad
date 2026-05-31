@@ -1,5 +1,7 @@
 package org.nguyendevs.ultimateWarpPad.travel;
 
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -40,6 +42,7 @@ public class TravelTask extends BukkitRunnable {
     private boolean destAnimStarted;
     private int convergeTicks;
     private int spiralTicks;
+    private BossBar travelBossBar;
 
     public TravelTask(JavaPlugin plugin, Player player, Warp source, Warp destination,
                       ConfigManager config, AnimationManager animationManager,
@@ -81,6 +84,18 @@ public class TravelTask extends BukkitRunnable {
             return;
         }
 
+        // Initialize persistent progress boss bar on the very first tick
+        if (ticks == 0 && config.isMessageBossBarEnabled()) {
+            Component bossText = messageManager.get("travel_boss_bar.start");
+            travelBossBar = BossBar.bossBar(bossText, 0.0f, BossBar.Color.WHITE, BossBar.Overlay.NOTCHED_10);
+            player.showBossBar(travelBossBar);
+        }
+
+        // Update boss bar progress every tick
+        if (travelBossBar != null) {
+            updateBossBarProgress();
+        }
+
         if (!teleported) {
             int bx = (int) Math.floor(source.getX());
             int bz = (int) Math.floor(source.getZ());
@@ -92,6 +107,7 @@ public class TravelTask extends BukkitRunnable {
                 player.removePotionEffect(PotionEffectType.GLOWING);
                 UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
                 messageManager.sendTravel(player, "cancelled");
+                hideBossBarWithMessage("cancelled", Map.of());
                 playCancelSound();
                 if (session != null) {
                     session.removePlayer(player);
@@ -290,6 +306,7 @@ public class TravelTask extends BukkitRunnable {
         }
         messageManager.sendTravel(player, "arrived",
                 Map.of("destination", destination.getWarpName()));
+        hideBossBarWithMessage("arrived", Map.of("destination", destination.getWarpName()));
         if (session == null) travelQueue.onComplete(destination);
         this.cancel();
     }
@@ -304,6 +321,7 @@ public class TravelTask extends BukkitRunnable {
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
         messageManager.sendTravel(player, "cancelled");
+        hideBossBarWithMessage("cancelled", Map.of());
         playCancelSound();
         if (session != null) {
             session.removePlayer(player);
@@ -316,6 +334,7 @@ public class TravelTask extends BukkitRunnable {
         if (!landed) {
             UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
             messageManager.sendTravel(player, "cancelled");
+            hideBossBarWithMessage("cancelled", Map.of());
             playCancelSound();
             if (session == null) travelQueue.onComplete(destination);
         }
@@ -326,6 +345,38 @@ public class TravelTask extends BukkitRunnable {
             animationManager.cancelAnimation(source);
         }
         this.cancel();
+    }
+
+    /** Calculates and sets boss bar fill: 0→1 ascending, 1→0 descending. */
+    private void updateBossBarProgress() {
+        // launchHeight = travel distance from warp surface to peak
+        double launchHeight = config.getLaunchY() + 1.0;
+        float progress;
+        if (!teleported) {
+            // Ascending: player rises from (source.Y+1) to (source.Y+2+launchY)
+            double startY = Math.floor(source.getY()) + 1.0;
+            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - startY) / launchHeight));
+        } else {
+            // Descending: player falls from (dest.Y+2+launchY) back to (dest.Y+1)
+            double destBaseY = Math.floor(destination.getY()) + 1.0;
+            progress = (float) Math.min(1.0, Math.max(0.0, (player.getY() - destBaseY) / launchHeight));
+        }
+        travelBossBar.progress(progress);
+    }
+
+    /**
+     * Swaps the boss bar text to the final key, sets progress to 0,
+     * and schedules the bar to hide after 3 s. Safe to call multiple times.
+     */
+    private void hideBossBarWithMessage(String key, Map<String, String> placeholders) {
+        if (travelBossBar == null) return;
+        final BossBar bar = travelBossBar;
+        travelBossBar = null;
+        if (!player.isOnline()) return;
+        Component text = messageManager.get("travel_boss_bar." + key, placeholders);
+        bar.name(text);
+        bar.progress(0.0f);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> player.hideBossBar(bar), 60L);
     }
 
     @Override

@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -169,16 +168,6 @@ public class MessageManager {
             player.sendActionBar(miniMessage.deserialize(convertLegacyCodes(raw)));
         }
 
-        if (configManager.isMessageBossBarEnabled()) {
-            String raw = getRaw("travel_boss_bar." + key);
-            for (Map.Entry<String, String> e : placeholders.entrySet()) {
-                raw = raw.replace("%" + e.getKey() + "%", e.getValue());
-            }
-            Component bossText = miniMessage.deserialize(convertLegacyCodes(raw));
-            BossBar bar = BossBar.bossBar(bossText, 1.0f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
-            player.showBossBar(bar);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.hideBossBar(bar), 60L);
-        }
 
         if (configManager.isMessageTitleEnabled()) {
             String titleRaw = getRaw("travel_title." + key);
