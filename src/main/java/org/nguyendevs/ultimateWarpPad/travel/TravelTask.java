@@ -260,6 +260,9 @@ public class TravelTask extends BukkitRunnable {
         }
         destLoc.setY(Math.floor(destLoc.getY()) + 2 + config.getLaunchY());
 
+        destLoc.setYaw(player.getLocation().getYaw());
+        destLoc.setPitch(player.getLocation().getPitch());
+
         player.teleport(destLoc);
         UltimateWarpPad.FALL_DAMAGE_IMMUNE.add(player.getUniqueId());
 
