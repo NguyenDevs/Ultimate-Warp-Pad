@@ -16,6 +16,8 @@ public class ConfigManager {
     private final JavaPlugin plugin;
     private int launchY;
     private boolean applyDarkness;
+    private boolean applyVanish;
+    private boolean applyGlowing;
     private boolean allowDamageCancel;
     private boolean forceStay;
     private int cooldown;
@@ -38,7 +40,9 @@ public class ConfigManager {
         FileConfiguration config = plugin.getConfig();
 
         launchY = config.getInt("travel.launch_y", 500);
-        applyDarkness = config.getBoolean("travel.apply_darkness", true);
+        applyDarkness = config.getBoolean("effect.apply_darkness", true);
+        applyVanish = config.getBoolean("effect.apply_vanish", true);
+        applyGlowing = config.getBoolean("effect.apply_glowing", true);
         allowDamageCancel = config.getBoolean("travel.allow_damage_cancel", true);
         forceStay = config.getBoolean("travel.force_stay", true);
         cooldown = config.getInt("travel.cooldown", -1);
@@ -64,6 +68,14 @@ public class ConfigManager {
 
     public boolean isApplyDarkness() {
         return applyDarkness;
+    }
+
+    public boolean isApplyVanish() {
+        return applyVanish;
+    }
+
+    public boolean isApplyGlowing() {
+        return applyGlowing;
     }
 
     public boolean isAllowDamageCancel() {

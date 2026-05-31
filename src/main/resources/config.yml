@@ -9,12 +9,16 @@ database:
 
 travel:
   launch_y: 250
-  apply_darkness: false
   allow_damage_cancel: true
   force_stay: true
   cooldown: -1
   group-teleporting: true
   center: true
+
+effect:
+  apply_darkness: false
+  apply_vanish: true
+  apply_glowing: true
 
 particle:
   enabled: true

@@ -364,6 +364,16 @@ public class WarpSelectionGUI {
             if (configManager.isApplyDarkness()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
             }
+            if (configManager.isApplyVanish()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
+            }
+            if (configManager.isApplyGlowing()) {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline() && player.hasPotionEffect(PotionEffectType.LEVITATION)) {
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                    }
+                }, 40L);
+            }
             new TravelTask(plugin, player, source, destination, configManager,
                     animationManager, messageManager, travelQueue, relX, relZ)
                     .runTaskTimer(plugin, 0L, 1L);
@@ -408,6 +418,16 @@ public class WarpSelectionGUI {
                 member.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 150, 0, false, false));
                 if (configManager.isApplyDarkness()) {
                     member.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, Integer.MAX_VALUE, 0, false, false));
+                }
+                if (configManager.isApplyVanish()) {
+                    member.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
+                }
+                if (configManager.isApplyGlowing()) {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        if (member.isOnline() && member.hasPotionEffect(PotionEffectType.LEVITATION)) {
+                            member.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+                        }
+                    }, 40L);
                 }
                 messageManager.send(member, "travel.start");
                 new TravelTask(plugin, member, source, destination, configManager,
