@@ -121,6 +121,12 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (warpManager.getOverlappingWarp(player.getLocation()) != null) {
+            messageManager.send(player, "warp.overlaps_existing");
+            playErrorSound(player);
+            return;
+        }
+
         if (warpManager.createWarp(warp)) {
             messageManager.send(player, "warp.created", Map.of("name", warpName));
             playSuccessSound(player);
