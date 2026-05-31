@@ -353,12 +353,19 @@ public class WarpSelectionGUI {
     }
 
     public void startTravel(Player player, Warp source, Warp destination) {
-        if (!warpManager.isSkyClear(source.getLocation())) {
+        boolean sourceOk = source.isAdminWarp()
+                ? warpManager.isSkyClearForAdmin(source.getLocation())
+                : warpManager.isSkyClear(source.getLocation());
+        if (!sourceOk) {
             messageManager.send(player, "error.blocked_above");
             travelQueue.onComplete(destination);
             return;
         }
-        if (!warpManager.isSkyClear(destination.getLocation())) {
+
+        boolean destOk = destination.isAdminWarp()
+                ? warpManager.isSkyClearForAdmin(destination.getLocation())
+                : warpManager.isSkyClear(destination.getLocation());
+        if (!destOk) {
             messageManager.send(player, "error.dest_blocked");
             travelQueue.onComplete(destination);
             return;
@@ -406,7 +413,7 @@ public class WarpSelectionGUI {
         if (configManager.isCenter()) {
             Location snapLoc = player.getLocation().clone();
             snapLoc.setX(centerX);
-            snapLoc.setY(source.getY() + 0.55);
+            snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 0.55));
             snapLoc.setZ(centerZ);
             player.teleport(snapLoc);
         }
@@ -463,7 +470,7 @@ public class WarpSelectionGUI {
             if (configManager.isCenter()) {
                 Location snapLoc = member.getLocation().clone();
                 snapLoc.setX(centerX);
-                snapLoc.setY(source.getY() + 0.55);
+                snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 0.55));
                 snapLoc.setZ(centerZ);
                 member.teleport(snapLoc);
             }
