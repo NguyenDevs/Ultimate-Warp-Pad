@@ -9,7 +9,6 @@ database:
 
 warp:
   launch-y: 250
-  allow-damage-cancel: true
   force-stay: true
   cooldown: -1
   center: true
@@ -18,11 +17,14 @@ group-teleport:
   enable: true
   collision: true
   max-per-warp: -1
+  delay-in-tick: 5
 
 effect:
   apply-darkness: false
   apply-vanish: true
   apply-glowing: true
+  apply_regeneration: false
+  
 
 message:
   chat: true

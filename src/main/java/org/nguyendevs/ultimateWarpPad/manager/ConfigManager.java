@@ -18,13 +18,14 @@ public class ConfigManager {
     private boolean applyDarkness;
     private boolean applyVanish;
     private boolean applyGlowing;
-    private boolean allowDamageCancel;
+    private boolean applyRegeneration;
     private boolean forceStay;
     private int cooldown;
     private int maxWarpsPerPlayer;
     private boolean groupTeleporting;
     private boolean groupCollision;
     private int groupMaxPerWarp;
+    private int groupDelayInTick;
     private boolean center;
     private List<String> waypointIcons;
     private List<String> disabledWorlds;
@@ -51,12 +52,13 @@ public class ConfigManager {
         applyDarkness = config.getBoolean("effect.apply-darkness", true);
         applyVanish = config.getBoolean("effect.apply-vanish", true);
         applyGlowing = config.getBoolean("effect.apply-glowing", true);
-        allowDamageCancel = config.getBoolean("warp.allow-damage-cancel", true);
+        applyRegeneration = config.getBoolean("effect.apply_regeneration", false);
         forceStay = config.getBoolean("warp.force-stay", true);
         cooldown = config.getInt("warp.cooldown", -1);
         groupTeleporting = config.getBoolean("group-teleport.enable", true);
         groupCollision = config.getBoolean("group-teleport.collision", true);
         groupMaxPerWarp = config.getInt("group-teleport.max-per-warp", -1);
+        groupDelayInTick = config.getInt("group-teleport.delay-in-tick", 5);
         center = config.getBoolean("warp.center", true);
         maxWarpsPerPlayer = config.getInt("max-warps-per-player", 5);
         waypointIcons = loadIconsyml();
@@ -91,8 +93,8 @@ public class ConfigManager {
         return applyGlowing;
     }
 
-    public boolean isAllowDamageCancel() {
-        return allowDamageCancel;
+    public boolean isApplyRegeneration() {
+        return applyRegeneration;
     }
 
     public boolean isForceStay() {
@@ -117,6 +119,10 @@ public class ConfigManager {
 
     public int getGroupMaxPerWarp() {
         return groupMaxPerWarp;
+    }
+
+    public int getGroupDelayInTick() {
+        return groupDelayInTick;
     }
 
     public boolean isCenter() {

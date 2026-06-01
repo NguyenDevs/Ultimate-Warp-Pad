@@ -61,6 +61,10 @@ public class WarpSelectionGUI {
         this.filterMode = new HashMap<>();
     }
 
+    public void updateCooldown(UUID uuid) {
+        cooldowns.put(uuid, System.currentTimeMillis());
+    }
+
     public void setSettingsGUI(SettingsGUI settingsGUI) {
         this.settingsGUI = settingsGUI;
     }
@@ -393,10 +397,6 @@ public class WarpSelectionGUI {
 
         animationManager.playAnimation(source);
 
-        if (configManager.getCooldown() > 0) {
-            cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-        }
-
         if (configManager.isGroupTeleporting()) {
             startGroupTravel(player, source, destination);
         } else {
@@ -427,6 +427,9 @@ public class WarpSelectionGUI {
             }
             if (configManager.isApplyGlowing()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
+            }
+            if (configManager.isApplyRegeneration()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 0, false, false));
             }
             if (configManager.isApplyVanish()) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -500,6 +503,10 @@ public class WarpSelectionGUI {
                     member.addPotionEffect(
                             new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false));
                 }
+                if (configManager.isApplyRegeneration()) {
+                    member.addPotionEffect(
+                            new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 0, false, false));
+                }
                 if (configManager.isApplyVanish()) {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         if (member.isOnline() && member.hasPotionEffect(PotionEffectType.LEVITATION)) {
@@ -514,7 +521,7 @@ public class WarpSelectionGUI {
                         .runTaskTimer(plugin, 0L, 1L);
             }, 30L + startOffset);
 
-            delay += 5;
+            delay += configManager.getGroupDelayInTick();
         }
     }
 

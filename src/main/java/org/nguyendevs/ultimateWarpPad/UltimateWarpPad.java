@@ -153,6 +153,10 @@ public final class UltimateWarpPad extends JavaPlugin {
         return craftManager;
     }
 
+    public WarpSelectionGUI getWarpSelectionGUI() {
+        return warpSelectionGUI;
+    }
+
     public void printLogo() {
     var s = Bukkit.getConsoleSender();
     s.sendMessage(ChatColor.translateAlternateColorCodes('&',""));

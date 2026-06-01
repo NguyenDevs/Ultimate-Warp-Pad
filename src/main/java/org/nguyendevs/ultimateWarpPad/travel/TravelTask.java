@@ -103,6 +103,7 @@ public class TravelTask extends BukkitRunnable {
                 player.removePotionEffect(PotionEffectType.DARKNESS);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
                 player.removePotionEffect(PotionEffectType.GLOWING);
+                player.removePotionEffect(PotionEffectType.REGENERATION);
                 UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
                 messageManager.sendTravel(player, "cancelled");
                 hideBossBarWithMessage("cancelled", Map.of());
@@ -195,8 +196,6 @@ public class TravelTask extends BukkitRunnable {
 
             if (player.isOnGround() || ticks > 600) {
                 landPlayer();
-            } else if (config.isAllowDamageCancel() && player.getHealth() < player.getHealthScale()) {
-                onDamageTaken();
             }
         }
 
@@ -300,9 +299,13 @@ public class TravelTask extends BukkitRunnable {
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
+        player.removePotionEffect(PotionEffectType.REGENERATION);
         Bukkit.getScheduler().runTaskLater(plugin, () ->
                 UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId()), 20L);
         landed = true;
+        if (plugin instanceof UltimateWarpPad) {
+            ((UltimateWarpPad) plugin).getWarpSelectionGUI().updateCooldown(player.getUniqueId());
+        }
         if (session != null) {
             session.onPlayerLanded(player);
         } else {
@@ -321,21 +324,7 @@ public class TravelTask extends BukkitRunnable {
                 1.0f, 0.8f);
     }
 
-    private void onDamageTaken() {
-        player.removePotionEffect(PotionEffectType.LEVITATION);
-        player.removePotionEffect(PotionEffectType.DARKNESS);
-        player.removePotionEffect(PotionEffectType.INVISIBILITY);
-        player.removePotionEffect(PotionEffectType.GLOWING);
-        messageManager.sendTravel(player, "cancelled");
-        hideBossBarWithMessage("cancelled", Map.of());
-        playCancelSound();
-        if (session != null) {
-            session.removePlayer(player);
-        }
-        if (session == null)
-            travelQueue.onComplete(destination);
-        cleanup();
-    }
+
 
     private void cleanup() {
         if (!landed) {
@@ -349,6 +338,7 @@ public class TravelTask extends BukkitRunnable {
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
+        player.removePotionEffect(PotionEffectType.REGENERATION);
         if (session == null) {
             animationManager.cancelAnimation(source);
         }
