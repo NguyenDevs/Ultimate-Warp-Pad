@@ -86,6 +86,7 @@ public final class UltimateWarpPad extends JavaPlugin {
 
         warpListener = new WarpListener(this, warpManager, messageManager, configManager,
                 warpSelectionGUI, settingsGUI, iconSelectionGUI);
+        warpListener.setCraftManager(craftManager);
         Bukkit.getPluginManager().registerEvents(warpListener, this);
 
         warpParticleManager = new WarpParticleManager(this, warpManager, configManager, animationManager);

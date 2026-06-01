@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -13,14 +14,19 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.nguyendevs.ultimateWarpPad.UltimateWarpPad;
 import org.nguyendevs.ultimateWarpPad.gui.IconSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
 import org.nguyendevs.ultimateWarpPad.gui.WarpSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
+import org.nguyendevs.ultimateWarpPad.manager.CraftManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
+import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
+import org.nguyendevs.ultimateWarpPad.model.WarpType;
 
 import java.util.*;
 
@@ -33,6 +39,7 @@ public class WarpListener implements Listener {
     private final WarpSelectionGUI warpSelectionGUI;
     private final SettingsGUI settingsGUI;
     private final IconSelectionGUI iconSelectionGUI;
+    private CraftManager craftManager;
 
     private final Map<UUID, Warp> playerOnWarp;
 
@@ -47,6 +54,80 @@ public class WarpListener implements Listener {
         this.settingsGUI = settingsGUI;
         this.iconSelectionGUI = iconSelectionGUI;
         this.playerOnWarp = new HashMap<>();
+    }
+
+    public void setCraftManager(CraftManager craftManager) {
+        this.craftManager = craftManager;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        ItemStack hand = event.getItemInHand();
+        if (craftManager == null || !craftManager.isEnabled()) return;
+        if (hand == null || hand.getItemMeta() == null) return;
+        if (!hand.getItemMeta().getPersistentDataContainer().has(craftManager.getPdcKey(), PersistentDataType.BYTE))
+            return;
+
+        event.setCancelled(true);
+
+        if (!player.hasPermission("uwp.user.create")) {
+            messageManager.send(player, "error.permission");
+            return;
+        }
+
+        if (configManager.isDisabledWorld(player.getWorld().getName())) {
+            messageManager.send(player, "error.disabled_world");
+            return;
+        }
+
+        Location loc = event.getBlock().getLocation();
+
+        if (!warpManager.isSkyClear(loc)) {
+            messageManager.send(player, "error.blocked_above");
+            return;
+        }
+
+        if (warpManager.getOverlappingWarp(loc) != null) {
+            messageManager.send(player, "warp.overlaps_existing");
+            return;
+        }
+
+        UUID uuid = player.getUniqueId();
+        int max = warpManager.getMaxWarpsPerPlayer();
+        if (warpManager.getPlayerWarpCount(uuid) >= max) {
+            messageManager.send(player, "warp.max_reached", Map.of("max", String.valueOf(max)));
+            return;
+        }
+
+        String warpId = generateWarpId(uuid);
+        String warpName = "Warp " + WarpManager.toRoman(warpManager.getPlayerWarpCount(uuid) + 1);
+
+        Warp warp = new Warp();
+        warp.setOwner(uuid);
+        warp.setWarpId(warpId);
+        warp.setWarpName(warpName);
+        warp.setLocation(loc);
+        warp.setType(WarpType.PLAYER);
+        warp.setCostType(CostType.XP);
+        warp.setCost(-1);
+        warp.setRange(1000);
+
+        if (warpManager.createWarp(warp)) {
+            hand.setAmount(hand.getAmount() - 1);
+            messageManager.send(player, "warp.created", Map.of("name", warpName));
+        }
+    }
+
+    private String generateWarpId(UUID owner) {
+        int count = warpManager.getPlayerWarpCount(owner) + 1;
+        String base = "warp" + count;
+        String id = base;
+        int suffix = 1;
+        while (warpManager.isWarpIdTaken(owner, id)) {
+            id = base + suffix++;
+        }
+        return id;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

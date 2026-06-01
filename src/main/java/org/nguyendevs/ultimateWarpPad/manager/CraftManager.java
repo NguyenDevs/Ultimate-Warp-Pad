@@ -1,7 +1,7 @@
 package org.nguyendevs.ultimateWarpPad.manager;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -24,9 +25,11 @@ import java.util.Map;
 public class CraftManager {
 
     private static final String RECIPE_KEY = "wpp_craft";
+    public  static final String PDC_KEY     = "warp_creator";
 
     private final JavaPlugin plugin;
     private final MiniMessage miniMessage;
+    private NamespacedKey pdcKey;
 
     private boolean enabled;
     private boolean disableCommand;
@@ -38,14 +41,13 @@ public class CraftManager {
     public CraftManager(JavaPlugin plugin) {
         this.plugin = plugin;
         this.miniMessage = MiniMessage.miniMessage();
+        this.pdcKey = new NamespacedKey(plugin, PDC_KEY);
     }
 
     public void load() {
         File file = new File(plugin.getDataFolder(), "craft.yml");
         if (!file.exists()) {
             plugin.saveResource("craft.yml", false);
-            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&3[&bUltimateWarpPad&3] &acraft.yml not found, created default."));
         }
 
         mergeDefaults(file);
@@ -61,6 +63,7 @@ public class CraftManager {
 
         if (!enabled) {
             unregisterRecipe();
+            lastRecipeHash = null;
             Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&3[&bUltimateWarpPad&3] &cCraft system disabled."));
             return;
@@ -95,16 +98,18 @@ public class CraftManager {
         ItemMeta meta = item.getItemMeta();
 
         String rawName = cfg.getString("name", "&aWarp Creator");
-        meta.displayName(parseComponent(rawName));
+        meta.displayName(parseComponent("<!italic>" + rawName));
 
         List<String> rawLore = cfg.getStringList("lore");
         if (!rawLore.isEmpty()) {
             List<Component> lore = new ArrayList<>();
             for (String line : rawLore) {
-                lore.add(parseComponent(line));
+                lore.add(parseComponent("<!italic>" + line));
             }
             meta.lore(lore);
         }
+
+        meta.getPersistentDataContainer().set(pdcKey, PersistentDataType.BYTE, (byte) 1);
 
         item.setItemMeta(meta);
         return item;
@@ -245,16 +250,15 @@ public class CraftManager {
         return craftItem != null ? craftItem.clone() : null;
     }
 
+    public NamespacedKey getPdcKey() {
+        return pdcKey;
+    }
+
     public boolean isCraftItem(ItemStack item) {
-        if (!enabled || craftItem == null || item == null || item.getType() != craftItem.getType())
-            return false;
+        if (!enabled || item == null) return false;
         ItemMeta meta = item.getItemMeta();
-        ItemMeta craftMeta = craftItem.getItemMeta();
-        if (meta == null || craftMeta == null)
-            return false;
-        if (!meta.hasDisplayName() || !craftMeta.hasDisplayName())
-            return false;
-        return meta.displayName().equals(craftMeta.displayName());
+        if (meta == null) return false;
+        return meta.getPersistentDataContainer().has(pdcKey, PersistentDataType.BYTE);
     }
 
     public void shutdown() {
