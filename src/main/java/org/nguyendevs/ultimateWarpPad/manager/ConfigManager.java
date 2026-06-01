@@ -37,6 +37,7 @@ public class ConfigManager {
     private boolean messageActionBarEnabled;
     private boolean messageBossBarEnabled;
     private boolean messageTitleEnabled;
+    private boolean connectPrivateTrusted;
 
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -75,6 +76,7 @@ public class ConfigManager {
         messageActionBarEnabled = config.getBoolean("message.action-bar", false);
         messageBossBarEnabled = config.getBoolean("message.boss-bar", false);
         messageTitleEnabled = config.getBoolean("message.title", false);
+        connectPrivateTrusted = config.getBoolean("connect-private-trusted", false);
     }
 
     public int getLaunchY() {
@@ -171,6 +173,10 @@ public class ConfigManager {
 
     public boolean isMessageTitleEnabled() {
         return messageTitleEnabled;
+    }
+
+    public boolean isConnectPrivateTrusted() {
+        return connectPrivateTrusted;
     }
 
     private List<String> loadIconsyml() {

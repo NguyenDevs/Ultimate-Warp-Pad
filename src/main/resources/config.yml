@@ -61,6 +61,9 @@ particle:
   # Particles burst on warp trigger
   trigger-amount: 4
 
+# Allow cross-navigation between own warps and trusted warps
+connect-private-trusted: false
+
 # Max personal warps a player can create (overridable via uwp.user.create.<n> permission)
 max-warps-per-player: 20
 

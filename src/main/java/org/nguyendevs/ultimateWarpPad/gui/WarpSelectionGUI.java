@@ -73,11 +73,7 @@ public class WarpSelectionGUI {
         UUID uuid = player.getUniqueId();
         openSelections.put(uuid, sourceWarp);
         currentPage.put(uuid, 0);
-        if (sourceWarp.isAdminWarp()) {
-            filterMode.put(uuid, 0);
-        } else {
-            filterMode.remove(uuid);
-        }
+        filterMode.put(uuid, 0);
         rebuildGUI(player);
     }
 
@@ -134,30 +130,26 @@ public class WarpSelectionGUI {
         UUID uuid = player.getUniqueId();
         boolean isAdmin = sourceWarp.isAdminWarp();
 
-        int mode = isAdmin ? filterMode.getOrDefault(uuid, 0) : 0;
-        List<String> modeNames = messageManager.getRawList("gui.warp_selection.filter_modes");
+        int mode = filterMode.getOrDefault(uuid, 0);
+        List<String> modeNames = messageManager.getRawList(isAdmin
+                ? "gui.warp_selection.filter_modes"
+                : "gui.warp_selection.filter_modes_player");
 
         Material mat = isAdmin ? getModeIcon(mode) : Material.BEACON;
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
 
-        if (isAdmin) {
-            String modeName = mode < modeNames.size() ? modeNames.get(mode) : "Unknown";
-            meta.displayName(messageManager.get("gui.warp_selection.beacon.admin_name")
-                    .decoration(TextDecoration.ITALIC, false));
-            meta.lore(messageManager.getComponentList("gui.warp_selection.beacon.admin_lore",
-                    Map.of("mode", modeName)).stream()
-                    .map(c -> c.decoration(TextDecoration.ITALIC, false))
-                    .collect(Collectors.toList()));
-        } else {
-            String type = sourceWarp.isOwner(uuid) ? "Your warps" : "Trusted warps";
-            meta.displayName(messageManager.get("gui.warp_selection.beacon.player_name")
-                    .decoration(TextDecoration.ITALIC, false));
-            meta.lore(messageManager.getComponentList("gui.warp_selection.beacon.player_lore",
-                    Map.of("type", type)).stream()
-                    .map(c -> c.decoration(TextDecoration.ITALIC, false))
-                    .collect(Collectors.toList()));
-        }
+        String modeName = mode < modeNames.size() ? modeNames.get(mode) : "Unknown";
+        meta.displayName(messageManager.get(isAdmin
+                        ? "gui.warp_selection.beacon.admin_name"
+                        : "gui.warp_selection.beacon.player_name")
+                .decoration(TextDecoration.ITALIC, false));
+        meta.lore(messageManager.getComponentList(isAdmin
+                        ? "gui.warp_selection.beacon.admin_lore"
+                        : "gui.warp_selection.beacon.player_lore",
+                Map.of("mode", modeName)).stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                .collect(Collectors.toList()));
 
         item.setItemMeta(meta);
         return item;
@@ -188,11 +180,23 @@ public class WarpSelectionGUI {
             };
         }
 
-        if (sourceWarp.isOwner(uuid)) {
-            return warpManager.getAvailableDestinations(sourceWarp, player);
+        boolean connect = configManager.isConnectPrivateTrusted();
+        int mode = filterMode.getOrDefault(uuid, 0);
+
+        if (mode == 0) {
+            if (sourceWarp.isOwner(uuid)) {
+                return warpManager.getAvailableDestinations(sourceWarp, player);
+            }
+            if (connect && sourceWarp.canPlayerUse(uuid)) {
+                return warpManager.getPlayerWarps(uuid).stream()
+                        .filter(w -> !w.getCompositeId().equals(sourceWarp.getCompositeId()))
+                        .filter(w -> warpManager.isInRange(sourceWarp, w))
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
         }
 
-        if (sourceWarp.canPlayerUse(uuid)) {
+        if (sourceWarp.canPlayerUse(uuid) && !sourceWarp.isOwner(uuid)) {
             UUID owner = sourceWarp.getOwner();
             return warpManager.getAllWarps().stream()
                     .filter(w -> w.getOwner() != null && w.getOwner().equals(owner))
@@ -201,7 +205,13 @@ public class WarpSelectionGUI {
                     .filter(w -> warpManager.isInRange(sourceWarp, w))
                     .collect(Collectors.toList());
         }
-
+        if (connect && sourceWarp.isOwner(uuid)) {
+            return warpManager.getAllWarps().stream()
+                    .filter(w -> w.getOwner() != null && !w.getOwner().equals(uuid))
+                    .filter(w -> w.canPlayerUse(uuid))
+                    .filter(w -> warpManager.isInRange(sourceWarp, w))
+                    .collect(Collectors.toList());
+        }
         return Collections.emptyList();
     }
 
@@ -260,11 +270,10 @@ public class WarpSelectionGUI {
         player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
 
         if (slot == SLOT_BEACON) {
-            if (sourceWarp.isAdminWarp()) {
-                UUID uuid = player.getUniqueId();
-                int mode = filterMode.getOrDefault(uuid, 0);
-                filterMode.put(uuid, (mode + 1) % 3);
-            }
+            UUID uuid = player.getUniqueId();
+            int mode = filterMode.getOrDefault(uuid, 0);
+            int maxMode = sourceWarp.isAdminWarp() ? 3 : 2;
+            filterMode.put(uuid, (mode + 1) % maxMode);
             rebuildGUI(player);
             return true;
         }
