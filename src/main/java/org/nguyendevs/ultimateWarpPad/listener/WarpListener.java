@@ -331,6 +331,9 @@ public class WarpListener implements Listener {
 
         warpManager.deleteWarp(warp);
         messageManager.send(player, "warp.deleted", Map.of("id", warp.getWarpId()));
+        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0f, 0.8f);
+        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0f, 0.3f);
+        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_SCULK_SHRIEKER_BREAK, 1.0f, 0.5f);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
