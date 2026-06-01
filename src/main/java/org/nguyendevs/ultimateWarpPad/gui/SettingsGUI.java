@@ -102,6 +102,7 @@ public class SettingsGUI {
             boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
             openSettings.remove(player.getUniqueId());
             fromSelectionMap.remove(player.getUniqueId());
+            player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
             if (fromSel && warpSelectionGUI != null) {
                 warpSelectionGUI.open(player, warp);
             } else {
