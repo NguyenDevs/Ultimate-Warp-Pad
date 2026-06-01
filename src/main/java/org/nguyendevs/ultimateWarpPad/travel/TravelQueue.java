@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
 
 import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -31,6 +32,18 @@ public class TravelQueue {
         String destId = destination.getCompositeId();
         queues.computeIfAbsent(destId, k -> new LinkedList<>())
               .add(new Entry(player, source, destination));
+    }
+
+    public boolean isQueued(Player player) {
+        UUID uuid = player.getUniqueId();
+        for (Queue<Entry> queue : queues.values()) {
+            for (Entry entry : queue) {
+                if (entry.player().getUniqueId().equals(uuid)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void onComplete(Warp destination) {

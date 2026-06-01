@@ -452,6 +452,7 @@ public class WarpSelectionGUI {
                 continue;
             if (Math.abs(nearby.getLocation().getBlockX() - bx) <= 1
                     && Math.abs(nearby.getLocation().getBlockZ() - bz) <= 1) {
+                if (travelQueue.isQueued(nearby)) continue;
                 group.add(nearby);
             }
         }
