@@ -20,6 +20,20 @@ warp:
   cooldown: -1
   # Snap player to the center of the warp pad on launch
   center: true
+  # Sounds played when travel starts (format: SOUND_NAME:volume:pitch)
+  start-sounds:
+    - "BLOCK_BEACON_ACTIVATE:1.0:0.5"
+    - "BLOCK_BEACON_POWER_SELECT:0.5:0.8"
+    - "AMBIENT_BASALT_DELTAS_LOOP:1.0:0.5"
+    - "AMBIENT_SOUL_SAND_VALLEY_MOOD:1.0:0.5"
+  # Sounds played during warmup phase 2 (format: SOUND_NAME:volume:pitch)
+  warmup-sounds:
+    - "BLOCK_TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM:1.0:0.9"
+    - "BLOCK_PORTAL_AMBIENT:0.8:0.1"
+    - "AMBIENT_CRIMSON_FOREST_LOOP:1.0:1.0"
+  # Sounds played when travel is cancelled (format: SOUND_NAME:volume:pitch)
+  cancel-sounds:
+    - "BLOCK_BEACON_DEACTIVATE:1.0:0.8"
 
 group-teleport:
   # Enable teleporting nearby players together

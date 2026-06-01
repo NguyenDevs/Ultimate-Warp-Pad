@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -165,10 +164,7 @@ public class TravelTask extends BukkitRunnable {
             player.removePotionEffect(PotionEffectType.LEVITATION);
             player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, Integer.MAX_VALUE, 60, false, false));
             Location ploc = player.getLocation();
-            player.getWorld().playSound(ploc, "minecraft:block.trial_spawner.about_to_spawn_item", SoundCategory.AMBIENT, 1.0f, 0.9f);
-            player.getWorld().playSound(ploc, "minecraft:block.portal.ambient", SoundCategory.AMBIENT, 0.8f, 0.1f);
-            player.getWorld().playSound(ploc, "minecraft:ambient.crimson_forest.loop", SoundCategory.AMBIENT, 1.0f,
-                    1.0f);
+            config.playSounds(player.getWorld(), ploc, config.getTravelWarmupSounds());
 
         }
 
@@ -320,8 +316,7 @@ public class TravelTask extends BukkitRunnable {
     }
 
     private void playCancelSound() {
-        source.getWorld().playSound(source.getLocation(), "minecraft:block.beacon.deactivate", SoundCategory.AMBIENT,
-                1.0f, 0.8f);
+        config.playSounds(source.getWorld(), source.getLocation(), config.getTravelCancelSounds());
     }
 
 

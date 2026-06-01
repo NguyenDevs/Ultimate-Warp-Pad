@@ -1,6 +1,10 @@
 package org.nguyendevs.ultimateWarpPad.manager;
 
+import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,6 +42,9 @@ public class ConfigManager {
     private boolean messageBossBarEnabled;
     private boolean messageTitleEnabled;
     private boolean connectPrivateTrusted;
+    private List<String> travelStartSounds;
+    private List<String> travelWarmupSounds;
+    private List<String> travelCancelSounds;
 
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -77,6 +84,9 @@ public class ConfigManager {
         messageBossBarEnabled = config.getBoolean("message.boss-bar", false);
         messageTitleEnabled = config.getBoolean("message.title", false);
         connectPrivateTrusted = config.getBoolean("connect-private-trusted", false);
+        travelStartSounds = config.getStringList("warp.start-sounds");
+        travelWarmupSounds = config.getStringList("warp.warmup-sounds");
+        travelCancelSounds = config.getStringList("warp.cancel-sounds");
     }
 
     public int getLaunchY() {
@@ -177,6 +187,36 @@ public class ConfigManager {
 
     public boolean isConnectPrivateTrusted() {
         return connectPrivateTrusted;
+    }
+
+    public List<String> getTravelStartSounds() {
+        return travelStartSounds;
+    }
+
+    public List<String> getTravelWarmupSounds() {
+        return travelWarmupSounds;
+    }
+
+    public List<String> getTravelCancelSounds() {
+        return travelCancelSounds;
+    }
+
+    public void playSounds(World world, Location loc, List<String> sounds) {
+        for (String s : sounds) {
+            String[] parts = s.split(":");
+            if (parts.length < 3) continue;
+            try {
+                String name = parts[0];
+                float volume = Float.parseFloat(parts[1]);
+                float pitch = Float.parseFloat(parts[2]);
+                if (name.contains(":")) {
+                    world.playSound(loc, name, SoundCategory.AMBIENT, volume, pitch);
+                } else {
+                    world.playSound(loc, Sound.valueOf(name), volume, pitch);
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private List<String> loadIconsyml() {

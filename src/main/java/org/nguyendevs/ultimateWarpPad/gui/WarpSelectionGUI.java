@@ -396,13 +396,7 @@ public class WarpSelectionGUI {
         }
 
         Location sourceLoc = source.getLocation();
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:block.beacon.activate", SoundCategory.AMBIENT, 1.0f, 0.5f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:block.beacon.power_select", SoundCategory.AMBIENT, 0.5f,
-                0.8f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.basalt_deltas.loop", SoundCategory.AMBIENT, 1.0f,
-                0.5f);
-        sourceLoc.getWorld().playSound(sourceLoc, "minecraft:ambient.soul_sand_valley.mood", SoundCategory.AMBIENT,
-                1.0f, 0.5f);
+        configManager.playSounds(sourceLoc.getWorld(), sourceLoc, configManager.getTravelStartSounds());
 
         animationManager.playAnimation(source);
 
