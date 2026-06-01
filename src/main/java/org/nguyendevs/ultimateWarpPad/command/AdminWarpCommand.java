@@ -133,7 +133,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
 
         if (warpManager.createWarp(warp)) {
             messageManager.send(sender, "warp.created", Map.of("name", warpName));
-            playSuccessSound(sender);
+            playCreateSound(sender);
         }
     }
 
@@ -154,7 +154,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
 
         warpManager.deleteWarp(warp);
         messageManager.send(sender, "warp.deleted", Map.of("id", args[1]));
-        playSuccessSound(sender);
+        playDeleteSound(sender);
     }
 
     private void handleSetting(CommandSender sender, String[] args) {
@@ -195,6 +195,23 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
     private void playSuccessSound(CommandSender sender) {
         if (sender instanceof Player player) {
             player.playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.5f);
+        }
+    }
+
+    private void playCreateSound(CommandSender sender){
+        if(sender instanceof Player player){
+            player.playSound(player.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1.0f, 0.8f);
+            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_HIT, 1.0f, 0.5f);
+            player.playSound(player.getLocation(), Sound.BLOCK_TRIAL_SPAWNER_DETECT_PLAYER, 1.0f, 0.5f);
+            
+        }
+    }
+
+    private void playDeleteSound(CommandSender sender){
+        if(sender instanceof Player player){
+            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0f, 0.8f);
+            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0f, 0.3f);
+            player.playSound(player.getLocation(), Sound.BLOCK_SCULK_SHRIEKER_BREAK, 1.0f, 0.5f);
         }
     }
 
