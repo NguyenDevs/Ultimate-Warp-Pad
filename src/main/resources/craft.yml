@@ -12,8 +12,7 @@ craft:
     E: QUARTZ_PILLAR
     D: DIAMOND_BLOCK
     C: CHISELED_QUARTZ_BLOCK
-item:
-  material: BEACON
+item: BEACON
 name: "&aWarp Creator"
 lore:
   - " "

@@ -87,7 +87,7 @@ public class CraftManager {
     }
 
     private ItemStack buildCraftItem(YamlConfiguration cfg) {
-        String matName = cfg.getString("item.material", "BEACON");
+        String matName = cfg.getString("item", "BEACON");
         Material mat = Material.matchMaterial(matName);
         if (mat == null) {
             plugin.getLogger().warning("Unknown item material: " + matName + ", falling back to BEACON.");
@@ -172,7 +172,7 @@ public class CraftManager {
             if (cfg.getConfigurationSection("craft.materials") != null) {
                 sb.append(cfg.getConfigurationSection("craft.materials").getValues(false));
             }
-            sb.append(cfg.getString("item.material", ""));
+            sb.append(cfg.getString("item", ""));
             sb.append(cfg.getString("name", ""));
             sb.append(cfg.getStringList("lore"));
 
