@@ -27,6 +27,7 @@ public final class UltimateWarpPad extends JavaPlugin {
     private DatabaseManager databaseManager;
     private AnimationManager animationManager;
     private WarpManager warpManager;
+    private CraftManager craftManager;
     private SettingsGUI settingsGUI;
     private WarpSelectionGUI warpSelectionGUI;
     private IconSelectionGUI iconSelectionGUI;
@@ -72,8 +73,11 @@ public final class UltimateWarpPad extends JavaPlugin {
         warpSelectionGUI = new WarpSelectionGUI(this, warpManager, messageManager, configManager, animationManager, travelQueue);
         warpSelectionGUI.setSettingsGUI(settingsGUI);
 
+        craftManager = new CraftManager(this);
+        craftManager.load();
+
         AdminWarpCommand adminCmd = new AdminWarpCommand(warpManager, configManager, messageManager, settingsGUI);
-        PlayerWarpCommand playerCmd = new PlayerWarpCommand(warpManager, messageManager, settingsGUI, configManager);
+        PlayerWarpCommand playerCmd = new PlayerWarpCommand(warpManager, messageManager, settingsGUI, configManager, craftManager);
 
         getCommand("wpa").setExecutor(adminCmd);
         getCommand("wpa").setTabCompleter(adminCmd);
@@ -122,6 +126,9 @@ public final class UltimateWarpPad extends JavaPlugin {
         if (warpParticleManager != null) {
             warpParticleManager.stop();
         }
+        if (craftManager != null) {
+            craftManager.shutdown();
+        }
         if (databaseManager != null) {
             databaseManager.close();
         }
@@ -139,6 +146,10 @@ public final class UltimateWarpPad extends JavaPlugin {
 
     public WarpManager getWarpManager() {
         return warpManager;
+    }
+
+    public CraftManager getCraftManager() {
+        return craftManager;
     }
 
     public void printLogo() {

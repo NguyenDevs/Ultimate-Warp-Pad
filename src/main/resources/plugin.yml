@@ -35,3 +35,6 @@ permissions:
   uwp.user.trust:
     description: Trust other players on your warps
     default: true
+  uwp.craft:
+    description: Permission to use the Warp Creator item to create a warp
+    default: op

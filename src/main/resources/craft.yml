@@ -1,0 +1,27 @@
+craft:
+  enable: false
+  disable-command: true
+  craftable: true
+  permission: "uwp.craft"
+
+  recipe:
+    - "ECE"
+    - "CNC"
+    - "EDE"
+
+  materials:
+    N: NETHER_STAR
+    E: QUARTZ_PILLAR
+    D: DIAMOND_BLOCK
+    C: CHISELED_QUARTZ_BLOCK
+
+item:
+  material: BEACON
+
+name: "&aWarp Creator"
+
+lore:
+  - " "
+  - "&7The core of WarpPad"
+  - "&7Place to build"
+  - " "

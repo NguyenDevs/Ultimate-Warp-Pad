@@ -8,6 +8,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
+import org.nguyendevs.ultimateWarpPad.manager.CraftManager;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
@@ -24,13 +25,15 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
     private final MessageManager messageManager;
     private final SettingsGUI settingsGUI;
     private final ConfigManager configManager;
+    private final CraftManager craftManager;
 
     public PlayerWarpCommand(WarpManager warpManager, MessageManager messageManager,
-                             SettingsGUI settingsGUI, ConfigManager configManager) {
+                             SettingsGUI settingsGUI, ConfigManager configManager, CraftManager craftManager) {
         this.warpManager = warpManager;
         this.messageManager = messageManager;
         this.settingsGUI = settingsGUI;
         this.configManager = configManager;
+        this.craftManager = craftManager;
     }
 
     @Override
@@ -67,6 +70,20 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
             messageManager.send(player, "error.permission");
             playErrorSound(player);
             return;
+        }
+
+        if (craftManager.isEnabled() && craftManager.isDisableCommand()) {
+            if (!player.hasPermission(craftManager.getPermission())) {
+                messageManager.send(player, "error.permission");
+                playErrorSound(player);
+                return;
+            }
+            org.bukkit.inventory.ItemStack hand = player.getInventory().getItemInMainHand();
+            if (!craftManager.isCraftItem(hand)) {
+                messageManager.send(player, "craft.item_required");
+                playErrorSound(player);
+                return;
+            }
         }
 
         if (configManager.isDisabledWorld(player.getWorld().getName())) {
@@ -134,6 +151,10 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
         warp.setLocation(warpLoc);
 
         if (warpManager.createWarp(warp)) {
+            if (craftManager.isEnabled() && craftManager.isDisableCommand()) {
+                org.bukkit.inventory.ItemStack hand = player.getInventory().getItemInMainHand();
+                hand.setAmount(hand.getAmount() - 1);
+            }
             messageManager.send(player, "warp.created", Map.of("name", warpName));
             playCreateSound(player);
         }

@@ -1,0 +1,259 @@
+package org.nguyendevs.ultimateWarpPad.manager;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class CraftManager {
+
+    private static final String RECIPE_KEY = "wpp_craft";
+
+    private final JavaPlugin plugin;
+    private final MiniMessage miniMessage;
+
+    private boolean enabled;
+    private boolean disableCommand;
+    private boolean craftable;
+    private String permission;
+    private ItemStack craftItem;
+    private String lastRecipeHash;
+
+    public CraftManager(JavaPlugin plugin) {
+        this.plugin = plugin;
+        this.miniMessage = MiniMessage.miniMessage();
+    }
+
+    public void load() {
+        File file = new File(plugin.getDataFolder(), "craft.yml");
+        if (!file.exists()) {
+            plugin.saveResource("craft.yml", false);
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &acraft.yml not found, created default.");
+        }
+
+        mergeDefaults(file);
+
+        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+
+        enabled = cfg.getBoolean("craft.enable", false);
+        disableCommand = cfg.getBoolean("craft.disable-command", true);
+        craftable = cfg.getBoolean("craft.craftable", true);
+        permission = cfg.getString("craft.permission", "uwp.craft");
+
+        craftItem = buildCraftItem(cfg);
+
+        if (!enabled) {
+            unregisterRecipe();
+            plugin.getLogger().info("[CraftManager] Craft system disabled.");
+            return;
+        }
+
+        if (craftable) {
+            String newHash = computeRecipeHash(cfg);
+            if (newHash.equals(lastRecipeHash)) {
+                plugin.getLogger().info("[CraftManager] Recipe unchanged, skipping re-registration.");
+                return;
+            }
+            unregisterRecipe();
+            registerRecipe(cfg);
+            lastRecipeHash = newHash;
+        } else {
+            unregisterRecipe();
+            plugin.getLogger().info("[CraftManager] Craftable is false, recipe removed.");
+        }
+    }
+
+    private ItemStack buildCraftItem(YamlConfiguration cfg) {
+        String matName = cfg.getString("item.material", "BEACON");
+        Material mat = Material.matchMaterial(matName);
+        if (mat == null) {
+            plugin.getLogger().warning("[CraftManager] Unknown item material: " + matName + ", falling back to BEACON.");
+            mat = Material.BEACON;
+        }
+
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+
+        String rawName = cfg.getString("name", "&aWarp Creator");
+        meta.displayName(parseComponent(rawName));
+
+        List<String> rawLore = cfg.getStringList("lore");
+        if (!rawLore.isEmpty()) {
+            List<Component> lore = new ArrayList<>();
+            for (String line : rawLore) {
+                lore.add(parseComponent(line));
+            }
+            meta.lore(lore);
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private void registerRecipe(YamlConfiguration cfg) {
+        List<String> shape = cfg.getStringList("craft.recipe");
+        if (shape.isEmpty() || shape.size() > 3) {
+            plugin.getLogger().warning("[CraftManager] Invalid recipe shape in craft.yml (must be 1-3 rows).");
+            return;
+        }
+
+        for (int i = 0; i < shape.size(); i++) {
+            if (shape.get(i).length() != 3) {
+                plugin.getLogger().warning("[CraftManager] Recipe row " + (i + 1) + " must be exactly 3 characters.");
+                return;
+            }
+        }
+
+        Map<String, Object> rawMaterials = cfg.getConfigurationSection("craft.materials") != null
+                ? cfg.getConfigurationSection("craft.materials").getValues(false)
+                : Map.of();
+
+        NamespacedKey key = new NamespacedKey(plugin, RECIPE_KEY);
+        ShapedRecipe recipe = new ShapedRecipe(key, craftItem.clone());
+
+        switch (shape.size()) {
+            case 1 -> recipe.shape(shape.get(0));
+            case 2 -> recipe.shape(shape.get(0), shape.get(1));
+            default -> recipe.shape(shape.get(0), shape.get(1), shape.get(2));
+        }
+
+        for (Map.Entry<String, Object> entry : rawMaterials.entrySet()) {
+            String symbol = entry.getKey();
+            if (symbol.length() != 1 || symbol.charAt(0) == ' ') continue;
+            Material mat = Material.matchMaterial(entry.getValue().toString());
+            if (mat == null) {
+                plugin.getLogger().warning("[CraftManager] Unknown material for symbol '" + symbol + "': " + entry.getValue());
+                continue;
+            }
+            recipe.setIngredient(symbol.charAt(0), mat);
+        }
+
+        Bukkit.addRecipe(recipe);
+        plugin.getLogger().info("[CraftManager] Registered WPP craft recipe (recipe book: enabled).");
+    }
+
+    private void unregisterRecipe() {
+        NamespacedKey key = new NamespacedKey(plugin, RECIPE_KEY);
+        if (Bukkit.getRecipe(key) != null) {
+            Bukkit.removeRecipe(key);
+            plugin.getLogger().info("[CraftManager] Removed previous WPP craft recipe.");
+        }
+    }
+
+    private String computeRecipeHash(YamlConfiguration cfg) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(cfg.getStringList("craft.recipe"));
+            if (cfg.getConfigurationSection("craft.materials") != null) {
+                sb.append(cfg.getConfigurationSection("craft.materials").getValues(false));
+            }
+            sb.append(cfg.getString("item.material", ""));
+            sb.append(cfg.getString("name", ""));
+            sb.append(cfg.getStringList("lore"));
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : bytes) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (Exception e) {
+            plugin.getLogger().warning("[CraftManager] Failed to compute recipe hash: " + e.getMessage());
+            return "";
+        }
+    }
+
+    private void mergeDefaults(File file) {
+        try (InputStream defStream = plugin.getResource("craft.yml")) {
+            if (defStream == null)
+                return;
+            YamlConfiguration defCfg = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(defStream, StandardCharsets.UTF_8));
+            YamlConfiguration serverCfg = YamlConfiguration.loadConfiguration(file);
+
+            boolean changed = false;
+            for (String key : defCfg.getKeys(true)) {
+                if (!defCfg.isConfigurationSection(key) && !serverCfg.contains(key)) {
+                    serverCfg.set(key, defCfg.get(key));
+                    changed = true;
+                }
+            }
+            if (changed) {
+                serverCfg.save(file);
+                plugin.getLogger().info("[CraftManager] Auto-updated craft.yml with missing keys.");
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("[CraftManager] Failed to merge craft.yml defaults: " + e.getMessage());
+        }
+    }
+
+    private Component parseComponent(String text) {
+        String converted = text
+                .replace("&0", "<black>").replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>").replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>").replace("&5", "<dark_purple>")
+                .replace("&6", "<gold>").replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>").replace("&9", "<blue>")
+                .replace("&a", "<green>").replace("&b", "<aqua>")
+                .replace("&c", "<red>").replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>").replace("&f", "<white>")
+                .replace("&k", "<obfuscated>").replace("&l", "<bold>")
+                .replace("&m", "<strikethrough>").replace("&n", "<underline>")
+                .replace("&o", "<italic>").replace("&r", "<reset>");
+        return miniMessage.deserialize(converted);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isDisableCommand() {
+        return enabled && disableCommand;
+    }
+
+    public boolean isCraftable() {
+        return craftable;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public ItemStack getCraftItem() {
+        return craftItem != null ? craftItem.clone() : null;
+    }
+
+    public boolean isCraftItem(ItemStack item) {
+        if (!enabled || craftItem == null || item == null || item.getType() != craftItem.getType())
+            return false;
+        ItemMeta meta = item.getItemMeta();
+        ItemMeta craftMeta = craftItem.getItemMeta();
+        if (meta == null || craftMeta == null)
+            return false;
+        if (!meta.hasDisplayName() || !craftMeta.hasDisplayName())
+            return false;
+        return meta.displayName().equals(craftMeta.displayName());
+    }
+
+    public void shutdown() {
+        unregisterRecipe();
+    }
+}
