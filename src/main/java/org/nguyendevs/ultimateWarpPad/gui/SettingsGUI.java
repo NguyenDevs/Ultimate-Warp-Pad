@@ -217,9 +217,11 @@ public class SettingsGUI {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(messageManager.get("gui.settings.range.name")
                 .decoration(TextDecoration.ITALIC, false));
+        int range = getPermissionRange(player);
+        boolean isExtra = range > 0 && warp.getRange() == range;
         String rangeText = warp.getRange() < 0
                 ? messageManager.getRaw("gui.settings.range.unlimited")
-                : warp.getRange() + " blocks";
+                : warp.getRange() + " blocks" + (isExtra ? " &6(Extra)" : "");
         List<Component> lore = new ArrayList<>();
         lore.add(messageManager.get("gui.settings.range.current",
                 Map.of("range", rangeText))
@@ -362,15 +364,18 @@ public class SettingsGUI {
         messageManager.send(player, "prompt.delete_confirm");
     }
 
-    private int[] getAvailableRanges(Warp warp, Player player) {
-        if (warp.isAdminWarp()) return ADMIN_RANGES;
-        int permRange = -1;
+    private int getPermissionRange(Player player) {
         for (int i = 10000; i >= 1; i--) {
             if (player.hasPermission("uwp.user.range." + i)) {
-                permRange = i;
-                break;
+                return i;
             }
         }
+        return -1;
+    }
+
+    private int[] getAvailableRanges(Warp warp, Player player) {
+        if (warp.isAdminWarp()) return ADMIN_RANGES;
+        int permRange = getPermissionRange(player);
         if (permRange > 0) {
             int[] base = PLAYER_RANGES;
             int[] result = Arrays.copyOf(base, base.length + 1);
