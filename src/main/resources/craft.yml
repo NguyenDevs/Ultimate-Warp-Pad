@@ -13,7 +13,7 @@ craft:
     E: QUARTZ_PILLAR
     D: DIAMOND_BLOCK
     C: CHISELED_QUARTZ_BLOCK
-item: BEACON
+item: END_ROD
 name: "&aWarp Creator"
 lore:
   - " "
