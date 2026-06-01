@@ -132,7 +132,7 @@ public class WarpSelectionGUI {
 
         int mode = filterMode.getOrDefault(uuid, 0);
         List<String> modeNames = messageManager.getRawList(isAdmin
-                ? "gui.warp_selection.filter_modes"
+                ? "gui.warp_selection.filter_modes_admin"
                 : "gui.warp_selection.filter_modes_player");
 
         Material mat = isAdmin ? getModeIcon(mode) : Material.BEACON;
