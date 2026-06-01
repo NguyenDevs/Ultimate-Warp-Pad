@@ -12,6 +12,26 @@ Bring the magic of the Crystal Gems to your Minecraft server! Ultimate Warp Pad 
 - **Highly Customizable:** Tweak messages, GUI layouts, Craft item, and warp settings via the config.
 - **Lightweight & Optimized:** Designed to have minimal impact on your server's performance.
 
+### Demo Video
+
+**Ultimate Warp Pad - Steven Universe Style**
+
+<iframe width="100%" height="450" 
+        src="https://www.youtube-nocookie.com/embed/jtLe_bDiM8Q" 
+        title="Ultimate Warp Pad Demo" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen>
+</iframe>
+
+<iframe width="100%" height="450" 
+        src="https://www.youtube-nocookie.com/embed/7McfmQKyr7Q" 
+        title="Ultimate Warp Pad Demo 2" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen>
+</iframe>
+
 **How It Works**
 - Set the Warp: Simple just one command. Plugin will create a real block warp structure for you. and add it into Warp System.
 - Travel: Players simply step onto the center of the pad, Press Shift and the Warp Selection GUI will appear, allowing them to travel to any other discovered/public warp pads!
