@@ -69,14 +69,14 @@ public class WarpListener implements Listener {
         if (!hand.getItemMeta().getPersistentDataContainer().has(craftManager.getPdcKey(), PersistentDataType.BYTE))
             return;
 
-        event.setCancelled(true);
-
         if (!player.hasPermission("uwp.user.create")) {
+            event.setCancelled(true);
             messageManager.send(player, "error.permission");
             return;
         }
 
         if (configManager.isDisabledWorld(player.getWorld().getName())) {
+            event.setCancelled(true);
             messageManager.send(player, "error.disabled_world");
             return;
         }
@@ -84,11 +84,13 @@ public class WarpListener implements Listener {
         Location loc = event.getBlock().getLocation();
 
         if (!warpManager.isSkyClear(loc)) {
+            event.setCancelled(true);
             messageManager.send(player, "error.blocked_above");
             return;
         }
 
         if (warpManager.getOverlappingWarp(loc) != null) {
+            event.setCancelled(true);
             messageManager.send(player, "warp.overlaps_existing");
             return;
         }
@@ -96,6 +98,7 @@ public class WarpListener implements Listener {
         UUID uuid = player.getUniqueId();
         int max = warpManager.getMaxWarpsPerPlayer();
         if (warpManager.getPlayerWarpCount(uuid) >= max) {
+            event.setCancelled(true);
             messageManager.send(player, "warp.max_reached", Map.of("max", String.valueOf(max)));
             return;
         }
@@ -103,20 +106,36 @@ public class WarpListener implements Listener {
         String warpId = generateWarpId(uuid);
         String warpName = "Warp " + WarpManager.toRoman(warpManager.getPlayerWarpCount(uuid) + 1);
 
-        Warp warp = new Warp();
-        warp.setOwner(uuid);
-        warp.setWarpId(warpId);
-        warp.setWarpName(warpName);
-        warp.setLocation(loc);
-        warp.setType(WarpType.PLAYER);
-        warp.setCostType(CostType.XP);
-        warp.setCost(-1);
-        warp.setRange(1000);
+        hand.setAmount(hand.getAmount() - 1);
 
-        if (warpManager.createWarp(warp)) {
-            hand.setAmount(hand.getAmount() - 1);
-            messageManager.send(player, "warp.created", Map.of("name", warpName));
-        }
+        org.bukkit.block.Block block = event.getBlock();
+        org.bukkit.Material placedType = event.getBlockPlaced().getType();
+
+        org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (block.getType() == placedType) {
+                block.setType(org.bukkit.Material.AIR);
+            }
+
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_GRINDSTONE_USE, 1.0f, 0.8f);
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_AMETHYST_BLOCK_HIT, 1.0f, 0.5f);
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_TRIAL_SPAWNER_DETECT_PLAYER, 1.0f, 0.5f);
+
+            org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                Warp warp = new Warp();
+                warp.setOwner(uuid);
+                warp.setWarpId(warpId);
+                warp.setWarpName(warpName);
+                warp.setLocation(loc);
+                warp.setType(WarpType.PLAYER);
+                warp.setCostType(CostType.XP);
+                warp.setCost(-1);
+                warp.setRange(1000);
+
+                if (warpManager.createWarp(warp)) {
+                    messageManager.send(player, "warp.created", Map.of("name", warpName));
+                }
+            }, 20L);
+        }, 1L);
     }
 
     private String generateWarpId(UUID owner) {
