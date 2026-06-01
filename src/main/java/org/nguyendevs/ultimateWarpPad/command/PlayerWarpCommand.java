@@ -73,11 +73,6 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
         }
 
         if (craftManager.isEnabled() && craftManager.isDisableCommand()) {
-            if (!player.hasPermission(craftManager.getPermission())) {
-                messageManager.send(player, "error.permission");
-                playErrorSound(player);
-                return;
-            }
             org.bukkit.inventory.ItemStack hand = player.getInventory().getItemInMainHand();
             if (!craftManager.isCraftItem(hand)) {
                 messageManager.send(player, "craft.item_required");
