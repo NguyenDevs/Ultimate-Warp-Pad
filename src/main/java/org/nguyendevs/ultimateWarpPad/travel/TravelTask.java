@@ -299,7 +299,8 @@ public class TravelTask extends BukkitRunnable {
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
-        UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
+        Bukkit.getScheduler().runTaskLater(plugin, () ->
+                UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId()), 20L);
         landed = true;
         if (session != null) {
             session.onPlayerLanded(player);
