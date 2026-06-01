@@ -34,6 +34,7 @@ public class CraftManager {
     private boolean enabled;
     private boolean disableCommand;
     private boolean craftable;
+    private boolean requirePermission;
     private String permission;
     private ItemStack craftItem;
     private String lastRecipeHash;
@@ -57,6 +58,7 @@ public class CraftManager {
         enabled = cfg.getBoolean("craft.enable", false);
         disableCommand = cfg.getBoolean("craft.disable-command", true);
         craftable = cfg.getBoolean("craft.craftable", true);
+        requirePermission = cfg.getBoolean("craft.require-permission", false);
         permission = cfg.getString("craft.permission", "uwp.craft");
 
         craftItem = buildCraftItem(cfg);
@@ -240,6 +242,10 @@ public class CraftManager {
 
     public boolean isCraftable() {
         return craftable;
+    }
+
+    public boolean isRequirePermission() {
+        return requirePermission;
     }
 
     public String getPermission() {

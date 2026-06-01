@@ -67,7 +67,7 @@ public class WarpListener implements Listener {
 
         ItemStack result = event.getRecipe().getResult();
         if (craftManager.isCraftItem(result)) {
-            if (event.getWhoClicked() instanceof Player player) {
+            if (craftManager.isRequirePermission() && event.getWhoClicked() instanceof Player player) {
                 if (!player.hasPermission(craftManager.getPermission())) {
                     event.setCancelled(true);
                     messageManager.send(player, "error.permission");
