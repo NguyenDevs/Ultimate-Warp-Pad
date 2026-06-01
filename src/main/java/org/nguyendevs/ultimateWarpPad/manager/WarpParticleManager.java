@@ -57,12 +57,14 @@ public class WarpParticleManager {
         int wx = (int) Math.floor(warp.getX());
         int wy = (int) Math.floor(warp.getY());
         int wz = (int) Math.floor(warp.getZ());
+        int half = warp.isAdminWarp() ? 3 : 2;
+        int halfY = warp.isAdminWarp() ? 2 : 1;
 
         for (Player player : warp.getWorld().getPlayers()) {
             int lx = player.getLocation().getBlockX();
             int ly = player.getLocation().getBlockY();
             int lz = player.getLocation().getBlockZ();
-            if (Math.abs(lx - wx) <= 2 && Math.abs(ly - wy) <= 1 && Math.abs(lz - wz) <= 2) {
+            if (Math.abs(lx - wx) <= half && Math.abs(ly - wy) <= halfY && Math.abs(lz - wz) <= half) {
                 return true;
             }
         }
@@ -74,10 +76,15 @@ public class WarpParticleManager {
         double cy = Math.floor(warp.getY());
         double cz = Math.floor(warp.getZ());
 
+        boolean isAdmin = warp.isAdminWarp();
+        double spread = isAdmin ? 7.0 : 5.0;
+        double originXZ = isAdmin ? 3.0 : 2.0;
+        double yBase = isAdmin ? cy + 1 : cy;
+
         for (int i = 0; i < configManager.getIdleParticleAmount(); i++) {
-            double x = cx - 2 + Math.random() * 5;
-            double y = cy + Math.random() * 3;
-            double z = cz - 2 + Math.random() * 5;
+            double x = cx - originXZ + Math.random() * spread;
+            double y = yBase + Math.random() * 3;
+            double z = cz - originXZ + Math.random() * spread;
             world.spawnParticle(particle, x, y, z, 0, 0, 0.02, 0, 0.01);
         }
     }
