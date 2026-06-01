@@ -447,11 +447,19 @@ public class WarpSelectionGUI {
         int bz = (int) Math.floor(source.getZ());
         Set<Player> group = new HashSet<>();
         group.add(clicker);
+
+        int maxPerWarp = configManager.getGroupMaxPerWarp(); // -1 = unlimited
+
         for (Player nearby : source.getWorld().getPlayers()) {
             if (nearby.equals(clicker))
                 continue;
+            if (maxPerWarp > 0 && group.size() >= maxPerWarp)
+                break;
             if (Math.abs(nearby.getLocation().getBlockX() - bx) <= 1
                     && Math.abs(nearby.getLocation().getBlockZ() - bz) <= 1) {
+                // Skip players already waiting in a travel queue — they will be
+                // teleported by their own queued entry; dragging them along would
+                // cause a double-teleport back-and-forth.
                 if (travelQueue.isQueued(nearby)) continue;
                 group.add(nearby);
             }

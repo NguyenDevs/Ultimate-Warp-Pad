@@ -23,6 +23,8 @@ public class ConfigManager {
     private int cooldown;
     private int maxWarpsPerPlayer;
     private boolean groupTeleporting;
+    private boolean groupCollision;
+    private int groupMaxPerWarp;
     private boolean center;
     private List<String> waypointIcons;
     private List<String> disabledWorlds;
@@ -45,16 +47,18 @@ public class ConfigManager {
         plugin.reloadConfig();
         FileConfiguration config = plugin.getConfig();
 
-        launchY = config.getInt("travel.launch_y", 500);
-        applyDarkness = config.getBoolean("effect.apply_darkness", true);
-        applyVanish = config.getBoolean("effect.apply_vanish", true);
-        applyGlowing = config.getBoolean("effect.apply_glowing", true);
-        allowDamageCancel = config.getBoolean("travel.allow_damage_cancel", true);
-        forceStay = config.getBoolean("travel.force_stay", true);
+        launchY = config.getInt("travel.launch-y", 500);
+        applyDarkness = config.getBoolean("effect.apply-darkness", true);
+        applyVanish = config.getBoolean("effect.apply-vanish", true);
+        applyGlowing = config.getBoolean("effect.apply-glowing", true);
+        allowDamageCancel = config.getBoolean("travel.allow-damage-cancel", true);
+        forceStay = config.getBoolean("travel.force-stay", true);
         cooldown = config.getInt("travel.cooldown", -1);
-        groupTeleporting = config.getBoolean("travel.group-teleporting", true);
+        groupTeleporting = config.getBoolean("group-teleport.enable", true);
+        groupCollision = config.getBoolean("group-teleport.collision", true);
+        groupMaxPerWarp = config.getInt("group-teleport.max-per-warp", -1);
         center = config.getBoolean("travel.center", true);
-        maxWarpsPerPlayer = config.getInt("max_warps_per_player", 5);
+        maxWarpsPerPlayer = config.getInt("max-warps-per-player", 5);
         waypointIcons = config.getStringList("warp-icons");
         if (waypointIcons.isEmpty()) {
             waypointIcons = List.of("NETHER_STAR", "DIAMOND", "EMERALD", "GOLD_INGOT");
@@ -66,11 +70,11 @@ public class ConfigManager {
         } catch (IllegalArgumentException e) {
             particleType = Particle.FIREWORK;
         }
-        idleParticleAmount = config.getInt("particle.idle_amount", 3);
-        triggerParticleAmount = config.getInt("particle.trigger_amount", 4);
+        idleParticleAmount = config.getInt("particle.idle-amount", 3);
+        triggerParticleAmount = config.getInt("particle.trigger-amount", 4);
         messageChatEnabled = config.getBoolean("message.chat", true);
-        messageActionBarEnabled = config.getBoolean("message.action_bar", false);
-        messageBossBarEnabled = config.getBoolean("message.boss_bar", false);
+        messageActionBarEnabled = config.getBoolean("message.action-bar", false);
+        messageBossBarEnabled = config.getBoolean("message.boss-bar", false);
         messageTitleEnabled = config.getBoolean("message.title", false);
     }
 
@@ -108,6 +112,14 @@ public class ConfigManager {
 
     public boolean isGroupTeleporting() {
         return groupTeleporting;
+    }
+
+    public boolean isGroupCollision() {
+        return groupCollision;
+    }
+
+    public int getGroupMaxPerWarp() {
+        return groupMaxPerWarp;
     }
 
     public boolean isCenter() {

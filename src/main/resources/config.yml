@@ -8,31 +8,35 @@ database:
     password: ""
 
 travel:
-  launch_y: 250
-  allow_damage_cancel: true
-  force_stay: true
+  launch-y: 250
+  allow-damage-cancel: true
+  force-stay: true
   cooldown: -1
-  group-teleporting: true
   center: true
 
+group-teleport:
+  enable: true
+  collision: true
+  max-per-warp: -1
+
 effect:
-  apply_darkness: false
-  apply_vanish: true
-  apply_glowing: true
+  apply-darkness: false
+  apply-vanish: true
+  apply-glowing: true
 
 message:
   chat: true
-  action_bar: false
-  boss_bar: false
+  action-bar: false
+  boss-bar: false
   title: false
 
 particle:
   enabled: true
   type: END_ROD
-  idle_amount: 3
-  trigger_amount: 4
+  idle-amount: 3
+  trigger-amount: 4
 
-max_warps_per_player: 20
+max-warps-per-player: 20
 
 disabled-worlds: []
 
