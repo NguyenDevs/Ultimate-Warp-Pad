@@ -7,6 +7,8 @@ database:
     username: root
     password: ""
 
+update-notify: true
+
 warp:
   launch-y: 250
   force-stay: true

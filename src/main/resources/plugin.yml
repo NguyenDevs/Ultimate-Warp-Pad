@@ -10,7 +10,7 @@ softdepend: [Vault]
 commands:
   wpa:
     description: Admin Warp Pad commands
-    usage: /wpa <reload|create|delete|setting>
+    usage: /wpa <reload|create|delete|setting|give>
     permission: uwp.admin
   wpp:
     description: Player Warp Pad commands

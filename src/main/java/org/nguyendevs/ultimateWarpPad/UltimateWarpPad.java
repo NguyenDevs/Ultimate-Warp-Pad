@@ -13,6 +13,7 @@ import org.nguyendevs.ultimateWarpPad.listener.WarpListener;
 import org.nguyendevs.ultimateWarpPad.manager.*;
 import org.nguyendevs.ultimateWarpPad.travel.TravelQueue;
 import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
+import org.nguyendevs.ultimateWarpPad.util.SpigotPlugin;
 
 import java.util.Set;
 import java.util.UUID;
@@ -93,6 +94,7 @@ public final class UltimateWarpPad extends JavaPlugin {
         warpParticleManager.start();
 
         printLogo();
+        new SpigotPlugin(135772, this).checkForUpdate();
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&3[&bUltimateWarpPad&3] &aWorldGuard hooked successfully!"));
