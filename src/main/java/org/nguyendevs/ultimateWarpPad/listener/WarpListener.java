@@ -190,11 +190,14 @@ public class WarpListener implements Listener {
     public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
         if (!event.isSneaking()) return;
         Player player = event.getPlayer();
-        if (configManager.isDisabledWorld(player.getWorld().getName())) return;
         Warp warp = playerOnWarp.get(player.getUniqueId());
-        if (warp != null) {
-            warpSelectionGUI.open(player, warp);
+        if (warp == null) return;
+        if (configManager.isDisabledWorld(player.getWorld().getName())) {
+            messageManager.send(player, "error.disabled_world");
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+            return;
         }
+        warpSelectionGUI.open(player, warp);
     }
 
     @EventHandler(priority = EventPriority.HIGH)

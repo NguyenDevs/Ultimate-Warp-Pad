@@ -36,6 +36,8 @@ public class WarpParticleManager {
                     World world = warp.getWorld();
                     if (world == null) continue;
 
+                    if (configManager.isDisabledWorld(world.getName())) continue;
+
                     if (animationManager.isAnimating(warp)) continue;
 
                     if (!hasPlayerNearby(warp)) continue;
