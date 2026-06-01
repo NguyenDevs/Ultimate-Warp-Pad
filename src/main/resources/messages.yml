@@ -29,19 +29,19 @@ travel_chat:
   start: "&7Warping..."
   arrived: "&aArrived at &f%destination%."
   cancelled: "&cWarp cancelled."
-  cooldown: "&cPlease wait &e%time%s before warping again."
+  cooldown: "&cPlease wait &e%time%s &cbefore warping again."
 
 travel_action_bar:
   start: "&7Warping..."
   arrived: "&aArrived at &f%destination%."
   cancelled: "&cWarp cancelled."
-  cooldown: "&cPlease wait &e%time%s before warping again."
+  cooldown: "&cPlease wait &e%time%s &cbefore warping again."
 
 travel_boss_bar:
   start: "&7Warping..."
   arrived: "&aArrived at &f%destination%."
   cancelled: "&cWarp cancelled."
-  cooldown: "&cPlease wait &e%time%s before warping again."
+  cooldown: "&cPlease wait &e%time%s &cbefore warping again."
 
 travel_title:
   start: "&fWarping"
