@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -58,6 +59,22 @@ public class WarpListener implements Listener {
 
     public void setCraftManager(CraftManager craftManager) {
         this.craftManager = craftManager;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onCraftItem(CraftItemEvent event) {
+        if (craftManager == null || !craftManager.isEnabled()) return;
+
+        ItemStack result = event.getRecipe().getResult();
+        if (craftManager.isCraftItem(result)) {
+            if (event.getWhoClicked() instanceof Player player) {
+                if (!player.hasPermission(craftManager.getPermission())) {
+                    event.setCancelled(true);
+                    messageManager.send(player, "error.permission");
+                    player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
