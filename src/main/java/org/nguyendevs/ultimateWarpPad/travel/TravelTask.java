@@ -164,7 +164,7 @@ public class TravelTask extends BukkitRunnable {
             player.removePotionEffect(PotionEffectType.LEVITATION);
             player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, Integer.MAX_VALUE, 60, false, false));
             Location ploc = player.getLocation();
-            player.getWorld().playSound(ploc, "minecraft:block.trial_spawner.about_to_spawn_item ambient", SoundCategory.AMBIENT, 1.0f, 0.9f);
+            player.getWorld().playSound(ploc, "minecraft:block.trial_spawner.about_to_spawn_item", SoundCategory.AMBIENT, 1.0f, 0.9f);
             player.getWorld().playSound(ploc, "minecraft:block.portal.ambient", SoundCategory.AMBIENT, 0.8f, 0.1f);
             player.getWorld().playSound(ploc, "minecraft:ambient.crimson_forest.loop", SoundCategory.AMBIENT, 1.0f,
                     1.0f);
