@@ -56,9 +56,10 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             case "create" -> handleCreate(sender, args);
             case "delete" -> handleDelete(sender, args);
             case "setting" -> handleSetting(sender, args);
+            case "give" -> handleGive(sender, args);
             default -> {
                 messageManager.send(sender, "error.invalid_syntax",
-                        Map.of("usage", "/wpa <reload|create|delete|setting>"));
+                        Map.of("usage", "/wpa <reload|create|delete|setting|give>"));
                 playErrorSound(sender);
             }
         }
@@ -70,6 +71,51 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
         messageManager.load();
         craftManager.load();
         messageManager.send(sender, "config.reloaded");
+        playSuccessSound(sender);
+    }
+
+    private void handleGive(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            messageManager.send(sender, "error.invalid_syntax",
+                    Map.of("usage", "/wpa give <player> [amount]"));
+            playErrorSound(sender);
+            return;
+        }
+
+        org.bukkit.entity.Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            messageManager.send(sender, "error.player_not_found", Map.of("player", args[1]));
+            playErrorSound(sender);
+            return;
+        }
+
+        int amount = 1;
+        if (args.length >= 3) {
+            try {
+                amount = Integer.parseInt(args[2]);
+                if (amount < 1 || amount > 64) {
+                    messageManager.send(sender, "craft.give_invalid_amount");
+                    playErrorSound(sender);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                messageManager.send(sender, "craft.give_invalid_amount");
+                playErrorSound(sender);
+                return;
+            }
+        }
+
+        org.bukkit.inventory.ItemStack item = craftManager.getCraftItem();
+        if (item == null) {
+            messageManager.send(sender, "craft.not_configured");
+            playErrorSound(sender);
+            return;
+        }
+
+        item.setAmount(amount);
+        target.getInventory().addItem(item);
+        messageManager.send(sender, "craft.give_success",
+                Map.of("player", target.getName(), "amount", String.valueOf(amount)));
         playSuccessSound(sender);
     }
 
@@ -235,7 +281,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             return Collections.emptyList();
 
         if (args.length == 1) {
-            return List.of("reload", "create", "delete", "setting").stream()
+            return List.of("reload", "create", "delete", "setting", "give").stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
@@ -256,7 +302,19 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
                     }
                     return ids;
                 }
+                case "give" -> {
+                    return org.bukkit.Bukkit.getOnlinePlayers().stream()
+                            .map(org.bukkit.entity.Player::getName)
+                            .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                            .collect(Collectors.toList());
+                }
             }
+        }
+
+        if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
+            return List.of("1", "4", "8", "16", "32", "64").stream()
+                    .filter(n -> n.startsWith(args[2]))
+                    .collect(Collectors.toList());
         }
 
         return Collections.emptyList();

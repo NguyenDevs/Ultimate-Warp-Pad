@@ -204,3 +204,6 @@ error:
 
 craft:
   item_required: "&cYou need a &aWarp Creator &citem to create a warp."
+  give_success: "&aGave &f%amount%x Warp Creator &ato &f%player%&a."
+  give_invalid_amount: "&cAmount must be between &e1 &cand &e64&c."
+  not_configured: "&cCraft item is not configured. Enable craft in craft.yml first."
