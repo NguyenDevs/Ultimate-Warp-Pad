@@ -506,7 +506,7 @@ public class WarpSelectionGUI {
                         .runTaskTimer(plugin, 0L, 1L);
             }, 30L + startOffset);
 
-            delay += 10;
+            delay += 5;
         }
     }
 
