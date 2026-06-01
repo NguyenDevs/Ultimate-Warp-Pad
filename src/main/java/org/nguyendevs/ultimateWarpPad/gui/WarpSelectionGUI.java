@@ -490,6 +490,10 @@ public class WarpSelectionGUI {
                 member.teleport(snapLoc);
             }
 
+            if (configManager.isGroupCollision()) {
+                member.setCollidable(false);
+            }
+
             final int startOffset = delay;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (Math.abs(member.getLocation().getBlockX() - bx) > 1

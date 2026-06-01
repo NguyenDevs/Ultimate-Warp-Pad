@@ -98,6 +98,7 @@ public class TravelTask extends BukkitRunnable {
             int bz = (int) Math.floor(source.getZ());
             if (Math.abs(player.getLocation().getBlockX() - bx) > 1
                     || Math.abs(player.getLocation().getBlockZ() - bz) > 1) {
+                player.setCollidable(true);
                 player.removePotionEffect(PotionEffectType.LEVITATION);
                 player.removePotionEffect(PotionEffectType.DARKNESS);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -292,6 +293,7 @@ public class TravelTask extends BukkitRunnable {
     }
 
     private void landPlayer() {
+        player.setCollidable(true);
         player.removePotionEffect(PotionEffectType.DARKNESS);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
@@ -322,6 +324,7 @@ public class TravelTask extends BukkitRunnable {
 
 
     private void cleanup() {
+        player.setCollidable(true);
         if (!landed) {
             UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(player.getUniqueId());
             messageManager.sendTravel(player, "cancelled");
