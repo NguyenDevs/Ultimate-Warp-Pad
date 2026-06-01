@@ -152,8 +152,19 @@ public class WarpManager {
         if (sourceWarp.isAdminWarp()) {
             List<Warp> destinations = new ArrayList<>(getAdminWarps());
             destinations.remove(sourceWarp);
+
             destinations.addAll(getPlayerWarps(playerUUID));
-            return filterByRange(destinations, sourceWarp);
+
+            for (Warp w : warps.values()) {
+                if (w.isAdminWarp()) continue;             
+                if (w.getOwner() != null && w.getOwner().equals(playerUUID)) continue; 
+                if (w.isPublic()) {
+                    destinations.add(w);
+                }
+            }
+
+            List<Warp> deduped = new ArrayList<>(new LinkedHashSet<>(destinations));
+            return filterByRange(deduped, sourceWarp);
         }
 
         if (sourceWarp.isOwner(playerUUID)) {
