@@ -280,7 +280,8 @@ public class WarpManager {
         if (warps.containsKey(cid)) return false;
 
         if (warp.getOwner() != null) {
-            int max = configManager.getMaxWarpsPerPlayer();
+            org.bukkit.entity.Player p = org.bukkit.Bukkit.getPlayer(warp.getOwner());
+            int max = p != null ? getEffectiveMaxWarps(p) : configManager.getMaxWarpsPerPlayer();
             if (getPlayerWarpCount(warp.getOwner()) >= max) return false;
         }
 
@@ -427,6 +428,15 @@ public class WarpManager {
     }
 
     public int getMaxWarpsPerPlayer() {
+        return configManager.getMaxWarpsPerPlayer();
+    }
+
+    public int getEffectiveMaxWarps(org.bukkit.entity.Player player) {
+        for (int i = 100; i >= 1; i--) {
+            if (player.hasPermission("uwp.user.create." + i)) {
+                return i;
+            }
+        }
         return configManager.getMaxWarpsPerPlayer();
     }
 

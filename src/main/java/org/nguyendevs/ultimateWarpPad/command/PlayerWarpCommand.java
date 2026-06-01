@@ -108,7 +108,7 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        int max = warpManager.getMaxWarpsPerPlayer();
+        int max = warpManager.getEffectiveMaxWarps(player);
         if (warpManager.getPlayerWarpCount(uuid) >= max) {
             messageManager.send(player, "warp.max_reached", Map.of("max", String.valueOf(max)));
             playErrorSound(player);

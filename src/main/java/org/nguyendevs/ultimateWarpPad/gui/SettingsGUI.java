@@ -364,6 +364,19 @@ public class SettingsGUI {
 
     private int[] getAvailableRanges(Warp warp, Player player) {
         if (warp.isAdminWarp()) return ADMIN_RANGES;
+        int permRange = -1;
+        for (int i = 10000; i >= 1; i--) {
+            if (player.hasPermission("uwp.user.range." + i)) {
+                permRange = i;
+                break;
+            }
+        }
+        if (permRange > 0) {
+            int[] base = PLAYER_RANGES;
+            int[] result = Arrays.copyOf(base, base.length + 1);
+            result[result.length - 1] = permRange;
+            return result;
+        }
         return PLAYER_RANGES;
     }
 

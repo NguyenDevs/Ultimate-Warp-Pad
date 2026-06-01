@@ -38,3 +38,9 @@ permissions:
   uwp.craft:
     description: Permission to use the Warp Creator item to create a warp
     default: op
+  uwp.user.create.<n>:
+    description: Override max warps per player. Replace <n> with a number.
+    default: false
+  uwp.user.range.<n>:
+    description: Add a custom range option to the range cycle. Replace <n> with a number.
+    default: false

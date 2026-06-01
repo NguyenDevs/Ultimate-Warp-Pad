@@ -113,7 +113,7 @@ public class WarpListener implements Listener {
         }
 
         UUID uuid = player.getUniqueId();
-        int max = warpManager.getMaxWarpsPerPlayer();
+        int max = warpManager.getEffectiveMaxWarps(player);
         if (warpManager.getPlayerWarpCount(uuid) >= max) {
             event.setCancelled(true);
             messageManager.send(player, "warp.max_reached", Map.of("max", String.valueOf(max)));
