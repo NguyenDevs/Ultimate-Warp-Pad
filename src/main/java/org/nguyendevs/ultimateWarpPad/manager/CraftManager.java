@@ -89,11 +89,11 @@ public class CraftManager {
     }
 
     private ItemStack buildCraftItem(YamlConfiguration cfg) {
-        String matName = cfg.getString("item", "BEACON");
+        String matName = cfg.getString("item", "END_ROD");
         Material mat = Material.matchMaterial(matName);
         if (mat == null) {
-            plugin.getLogger().warning("Unknown item material: " + matName + ", falling back to BEACON.");
-            mat = Material.BEACON;
+            plugin.getLogger().warning("Unknown item material: " + matName + ", falling back to END_ROD.");
+            mat = Material.END_ROD;
         }
 
         ItemStack item = new ItemStack(mat);
