@@ -95,6 +95,7 @@ public class WarpListener implements Listener {
         if (configManager.isDisabledWorld(player.getWorld().getName())) {
             event.setCancelled(true);
             messageManager.send(player, "error.disabled_world");
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
             return;
         }
 
