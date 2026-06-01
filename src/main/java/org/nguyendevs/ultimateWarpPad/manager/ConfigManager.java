@@ -47,22 +47,19 @@ public class ConfigManager {
         plugin.reloadConfig();
         FileConfiguration config = plugin.getConfig();
 
-        launchY = config.getInt("travel.launch-y", 500);
+        launchY = config.getInt("warp.launch-y", 500);
         applyDarkness = config.getBoolean("effect.apply-darkness", true);
         applyVanish = config.getBoolean("effect.apply-vanish", true);
         applyGlowing = config.getBoolean("effect.apply-glowing", true);
-        allowDamageCancel = config.getBoolean("travel.allow-damage-cancel", true);
-        forceStay = config.getBoolean("travel.force-stay", true);
-        cooldown = config.getInt("travel.cooldown", -1);
+        allowDamageCancel = config.getBoolean("warp.allow-damage-cancel", true);
+        forceStay = config.getBoolean("warp.force-stay", true);
+        cooldown = config.getInt("warp.cooldown", -1);
         groupTeleporting = config.getBoolean("group-teleport.enable", true);
         groupCollision = config.getBoolean("group-teleport.collision", true);
         groupMaxPerWarp = config.getInt("group-teleport.max-per-warp", -1);
-        center = config.getBoolean("travel.center", true);
+        center = config.getBoolean("warp.center", true);
         maxWarpsPerPlayer = config.getInt("max-warps-per-player", 5);
-        waypointIcons = config.getStringList("warp-icons");
-        if (waypointIcons.isEmpty()) {
-            waypointIcons = List.of("NETHER_STAR", "DIAMOND", "EMERALD", "GOLD_INGOT");
-        }
+        waypointIcons = loadIconsyml();
         disabledWorlds = config.getStringList("disabled-worlds");
         particleEnabled = config.getBoolean("particle.enabled", true);
         try {
@@ -168,6 +165,39 @@ public class ConfigManager {
 
     public boolean isMessageTitleEnabled() {
         return messageTitleEnabled;
+    }
+
+    /** Load icons from the separate icons.yml file, saving defaults if missing. */
+    private List<String> loadIconsyml() {
+        File iconsFile = new File(plugin.getDataFolder(), "icons.yml");
+        if (!iconsFile.exists()) {
+            plugin.saveResource("icons.yml", false);
+        }
+        YamlConfiguration iconsConfig = YamlConfiguration.loadConfiguration(iconsFile);
+        // Merge any new default entries that don't exist yet in the server's file
+        try (java.io.InputStream defStream = plugin.getResource("icons.yml")) {
+            if (defStream != null) {
+                YamlConfiguration defIcons = YamlConfiguration.loadConfiguration(
+                        new InputStreamReader(defStream, StandardCharsets.UTF_8));
+                boolean changed = false;
+                for (String key : defIcons.getKeys(true)) {
+                    if (!defIcons.isConfigurationSection(key) && !iconsConfig.contains(key)) {
+                        iconsConfig.set(key, defIcons.get(key));
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    iconsConfig.save(iconsFile);
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to merge icons.yml defaults: " + e.getMessage());
+        }
+        List<String> icons = iconsConfig.getStringList("icons");
+        if (icons.isEmpty()) {
+            icons = List.of("NETHER_STAR", "DIAMOND", "EMERALD", "GOLD_INGOT");
+        }
+        return icons;
     }
 
     private void autoUpdateKeys() {
