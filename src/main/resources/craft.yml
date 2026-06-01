@@ -2,6 +2,7 @@ craft:
   enable: false
   disable-command: true
   craftable: true
+  require-permission: false
   permission: "uwp.craft"
   recipe:
     - "ECE"
