@@ -45,7 +45,7 @@ public class CraftManager {
         if (!file.exists()) {
             plugin.saveResource("craft.yml", false);
             Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&3[&bUltimateWarpPad&3] &acraft.yml not found, created default.");
+                    "&3[&bUltimateWarpPad&3] &acraft.yml not found, created default."));
         }
 
         mergeDefaults(file);
@@ -61,14 +61,16 @@ public class CraftManager {
 
         if (!enabled) {
             unregisterRecipe();
-            plugin.getLogger().info("[CraftManager] Craft system disabled.");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &cCraft system disabled."));
             return;
         }
 
         if (craftable) {
             String newHash = computeRecipeHash(cfg);
             if (newHash.equals(lastRecipeHash)) {
-                plugin.getLogger().info("[CraftManager] Recipe unchanged, skipping re-registration.");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aRecipe unchanged, skipping re-registration."));
                 return;
             }
             unregisterRecipe();
@@ -76,7 +78,8 @@ public class CraftManager {
             lastRecipeHash = newHash;
         } else {
             unregisterRecipe();
-            plugin.getLogger().info("[CraftManager] Craftable is false, recipe removed.");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aCraftable is false, recipe removed."));
         }
     }
 
@@ -84,7 +87,7 @@ public class CraftManager {
         String matName = cfg.getString("item.material", "BEACON");
         Material mat = Material.matchMaterial(matName);
         if (mat == null) {
-            plugin.getLogger().warning("[CraftManager] Unknown item material: " + matName + ", falling back to BEACON.");
+            plugin.getLogger().warning("Unknown item material: " + matName + ", falling back to BEACON.");
             mat = Material.BEACON;
         }
 
@@ -110,13 +113,15 @@ public class CraftManager {
     private void registerRecipe(YamlConfiguration cfg) {
         List<String> shape = cfg.getStringList("craft.recipe");
         if (shape.isEmpty() || shape.size() > 3) {
-            plugin.getLogger().warning("[CraftManager] Invalid recipe shape in craft.yml (must be 1-3 rows).");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &cInvalid recipe shape in craft.yml (must be 1-3 rows)."));
             return;
         }
 
         for (int i = 0; i < shape.size(); i++) {
             if (shape.get(i).length() != 3) {
-                plugin.getLogger().warning("[CraftManager] Recipe row " + (i + 1) + " must be exactly 3 characters.");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aRecipe row " + (i + 1) + " must be exactly 3 characters."));
                 return;
             }
         }
@@ -139,21 +144,19 @@ public class CraftManager {
             if (symbol.length() != 1 || symbol.charAt(0) == ' ') continue;
             Material mat = Material.matchMaterial(entry.getValue().toString());
             if (mat == null) {
-                plugin.getLogger().warning("[CraftManager] Unknown material for symbol '" + symbol + "': " + entry.getValue());
+                plugin.getLogger().warning("Unknown material for symbol '" + symbol + "': " + entry.getValue());
                 continue;
             }
             recipe.setIngredient(symbol.charAt(0), mat);
         }
 
         Bukkit.addRecipe(recipe);
-        plugin.getLogger().info("[CraftManager] Registered WPP craft recipe (recipe book: enabled).");
     }
 
     private void unregisterRecipe() {
         NamespacedKey key = new NamespacedKey(plugin, RECIPE_KEY);
         if (Bukkit.getRecipe(key) != null) {
             Bukkit.removeRecipe(key);
-            plugin.getLogger().info("[CraftManager] Removed previous WPP craft recipe.");
         }
     }
 
@@ -176,7 +179,7 @@ public class CraftManager {
             }
             return hex.toString();
         } catch (Exception e) {
-            plugin.getLogger().warning("[CraftManager] Failed to compute recipe hash: " + e.getMessage());
+            plugin.getLogger().warning("Failed to compute recipe hash: " + e.getMessage());
             return "";
         }
     }
@@ -198,10 +201,11 @@ public class CraftManager {
             }
             if (changed) {
                 serverCfg.save(file);
-                plugin.getLogger().info("[CraftManager] Auto-updated craft.yml with missing keys.");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aAuto-updated craft.yml with missing keys."));
             }
         } catch (Exception e) {
-            plugin.getLogger().warning("[CraftManager] Failed to merge craft.yml defaults: " + e.getMessage());
+            plugin.getLogger().warning("Failed to merge craft.yml defaults: " + e.getMessage());
         }
     }
 
