@@ -167,14 +167,12 @@ public class ConfigManager {
         return messageTitleEnabled;
     }
 
-    /** Load icons from the separate icons.yml file, saving defaults if missing. */
     private List<String> loadIconsyml() {
         File iconsFile = new File(plugin.getDataFolder(), "icons.yml");
         if (!iconsFile.exists()) {
             plugin.saveResource("icons.yml", false);
         }
         YamlConfiguration iconsConfig = YamlConfiguration.loadConfiguration(iconsFile);
-        // Merge any new default entries that don't exist yet in the server's file
         try (java.io.InputStream defStream = plugin.getResource("icons.yml")) {
             if (defStream != null) {
                 YamlConfiguration defIcons = YamlConfiguration.loadConfiguration(
@@ -203,7 +201,8 @@ public class ConfigManager {
     private void autoUpdateKeys() {
         File file = new File(plugin.getDataFolder(), "config.yml");
         try (InputStream defStream = plugin.getResource("config.yml")) {
-            if (defStream == null) return;
+            if (defStream == null)
+                return;
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
                     new InputStreamReader(defStream, StandardCharsets.UTF_8));
             YamlConfiguration serverConfig = YamlConfiguration.loadConfiguration(file);
