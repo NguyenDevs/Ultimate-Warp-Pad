@@ -21,12 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SettingsGUI {
 
-    private static final int SLOT_ITEM1 = 0;
-    private static final int SLOT_ITEM2 = 2;
-    private static final int SLOT_ITEM3 = 3;
-    private static final int SLOT_ITEM4 = 4;
-    private static final int SLOT_ICON = 6;
-    private static final int SLOT_DELETE = 8;
+    private static final int SLOT_ITEM1 = 10;
+    private static final int SLOT_ITEM2 = 12;
+    private static final int SLOT_ITEM4 = 14;
+    private static final int SLOT_ICON = 15;
+    private static final int SLOT_DELETE = 16;
+    private static final int SLOT_RETURN_CLOSE = 26;
 
     private static final int[] ADMIN_RANGES = {-1, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
     private static final int[] PLAYER_RANGES = {50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000};
@@ -34,15 +34,20 @@ public class SettingsGUI {
     private final WarpManager warpManager;
     private final MessageManager messageManager;
     private final Map<UUID, Warp> openSettings;
+    private final Map<UUID, Boolean> fromSelectionMap;
+    private final Map<UUID, Boolean> pendingFromSelection;
     private final Map<UUID, Warp> pendingNameChanges;
     private final Map<UUID, Warp> pendingCostAmounts;
     private final Map<UUID, Warp> pendingDeletions;
     private IconSelectionGUI iconSelectionGUI;
+    private WarpSelectionGUI warpSelectionGUI;
 
     public SettingsGUI(WarpManager warpManager, MessageManager messageManager) {
         this.warpManager = warpManager;
         this.messageManager = messageManager;
         this.openSettings = new HashMap<>();
+        this.fromSelectionMap = new HashMap<>();
+        this.pendingFromSelection = new HashMap<>();
         this.pendingNameChanges = new ConcurrentHashMap<>();
         this.pendingCostAmounts = new ConcurrentHashMap<>();
         this.pendingDeletions = new ConcurrentHashMap<>();
@@ -52,8 +57,16 @@ public class SettingsGUI {
         this.iconSelectionGUI = iconSelectionGUI;
     }
 
+    public void setWarpSelectionGUI(WarpSelectionGUI warpSelectionGUI) {
+        this.warpSelectionGUI = warpSelectionGUI;
+    }
+
     public void open(Player player, Warp warp) {
-        Inventory inv = Bukkit.createInventory(null, 9,
+        open(player, warp, false);
+    }
+
+    public void open(Player player, Warp warp, boolean fromSelection) {
+        Inventory inv = Bukkit.createInventory(null, 27,
                 messageManager.get("gui.settings.title"));
 
         if (warp.getType() == WarpType.PLAYER) {
@@ -69,14 +82,33 @@ public class SettingsGUI {
         inv.setItem(SLOT_ICON, createIconItem(warp));
         inv.setItem(SLOT_DELETE, createDeleteItem(warp));
 
+        if (fromSelection) {
+            inv.setItem(SLOT_RETURN_CLOSE, createReturnItem());
+        } else {
+            inv.setItem(SLOT_RETURN_CLOSE, createCloseItem());
+        }
+
         player.openInventory(inv);
         player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f, 1.0f);
         openSettings.put(player.getUniqueId(), warp);
+        fromSelectionMap.put(player.getUniqueId(), fromSelection);
     }
 
     public boolean handleClick(Player player, int slot, ClickType clickType, ItemStack cursor) {
         Warp warp = openSettings.get(player.getUniqueId());
         if (warp == null) return false;
+
+        if (slot == SLOT_RETURN_CLOSE) {
+            boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
+            openSettings.remove(player.getUniqueId());
+            fromSelectionMap.remove(player.getUniqueId());
+            if (fromSel && warpSelectionGUI != null) {
+                warpSelectionGUI.open(player, warp);
+            } else {
+                player.closeInventory();
+            }
+            return true;
+        }
 
         player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
 
@@ -141,7 +173,7 @@ public class SettingsGUI {
                 .decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         lore.add(messageManager.get("gui.settings.name.current",
-                Map.of("name", messageManager.translateColorCodes(warp.getWarpName())))
+                Map.of("name", warp.getWarpName()))
                 .decoration(TextDecoration.ITALIC, false));
         lore.addAll(messageManager.getComponentList("gui.settings.name.lore").stream()
                 .map(c -> c.decoration(TextDecoration.ITALIC, false))
@@ -227,18 +259,47 @@ public class SettingsGUI {
         return item;
     }
 
+    private ItemStack createReturnItem() {
+        ItemStack item = new ItemStack(Material.STRUCTURE_VOID);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(messageManager.get("gui.settings.return_button.name")
+                .decoration(TextDecoration.ITALIC, false));
+        List<Component> lore = messageManager.getComponentList("gui.settings.return_button.lore").stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                .toList();
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack createCloseItem() {
+        ItemStack item = new ItemStack(Material.STRUCTURE_VOID);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(messageManager.get("gui.settings.close_button.name")
+                .decoration(TextDecoration.ITALIC, false));
+        List<Component> lore = messageManager.getComponentList("gui.settings.close_button.lore").stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                .toList();
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     private void handleVisibilityToggle(Player player, Warp warp) {
         warp.setPublic(!warp.isPublic());
         warpManager.saveWarp(warp);
         messageManager.send(player, "warp.visibility_changed",
                 Map.of("visibility", warp.isPublic() ? "Public" : "Private"));
-        open(player, warp);
+        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
     }
 
     private void handleNameChange(Player player, Warp warp) {
+        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
         player.closeInventory();
         openSettings.remove(player.getUniqueId());
+        fromSelectionMap.remove(player.getUniqueId());
         pendingNameChanges.put(player.getUniqueId(), warp);
+        pendingFromSelection.put(player.getUniqueId(), fromSel);
         messageManager.send(player, "prompt.enter_name");
     }
 
@@ -250,14 +311,17 @@ public class SettingsGUI {
             warp.setCost(-1);
         }
         warpManager.saveWarp(warp);
-        open(player, warp);
+        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
     }
 
     private void handleCostAmountPrompt(Player player, Warp warp) {
         if (warp.getCostType() == CostType.FREE) return;
+        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
         player.closeInventory();
         openSettings.remove(player.getUniqueId());
+        fromSelectionMap.remove(player.getUniqueId());
         pendingCostAmounts.put(player.getUniqueId(), warp);
+        pendingFromSelection.put(player.getUniqueId(), fromSel);
         messageManager.send(player, "prompt.enter_cost_amount");
     }
 
@@ -278,19 +342,22 @@ public class SettingsGUI {
                 ? messageManager.getRaw("gui.settings.range.unlimited")
                 : newRange + " blocks";
         messageManager.send(player, "warp.range_changed", Map.of("range", rangeText));
-        open(player, warp);
+        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
     }
 
     private void handleIconSelection(Player player, Warp warp) {
         if (iconSelectionGUI != null) {
-            iconSelectionGUI.open(player, warp);
+            iconSelectionGUI.open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
         }
     }
 
     private void handleDeletePrompt(Player player, Warp warp) {
+        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
         player.closeInventory();
         openSettings.remove(player.getUniqueId());
+        fromSelectionMap.remove(player.getUniqueId());
         pendingDeletions.put(player.getUniqueId(), warp);
+        pendingFromSelection.put(player.getUniqueId(), fromSel);
         messageManager.send(player, "prompt.delete_confirm");
     }
 
@@ -301,6 +368,7 @@ public class SettingsGUI {
 
     public void close(Player player) {
         openSettings.remove(player.getUniqueId());
+        fromSelectionMap.remove(player.getUniqueId());
     }
 
     public Warp removePendingNameChange(UUID playerUUID) {
@@ -331,10 +399,20 @@ public class SettingsGUI {
         return pendingDeletions.containsKey(playerUUID);
     }
 
+    public boolean getPendingFromSelection(UUID playerUUID) {
+        return pendingFromSelection.getOrDefault(playerUUID, false);
+    }
+
+    public boolean removePendingFromSelection(UUID playerUUID) {
+        return pendingFromSelection.remove(playerUUID);
+    }
+
     public void cleanup(Player player) {
         openSettings.remove(player.getUniqueId());
+        fromSelectionMap.remove(player.getUniqueId());
         pendingNameChanges.remove(player.getUniqueId());
         pendingCostAmounts.remove(player.getUniqueId());
         pendingDeletions.remove(player.getUniqueId());
+        pendingFromSelection.remove(player.getUniqueId());
     }
 }

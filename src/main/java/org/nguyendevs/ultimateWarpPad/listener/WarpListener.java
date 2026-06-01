@@ -240,7 +240,7 @@ public class WarpListener implements Listener {
         if (!title.equals(settingsTitle)) return;
 
         for (int slot : event.getRawSlots()) {
-            if (slot >= 0 && slot < 9) {
+            if (slot >= 0 && slot < 27) {
                 event.setCancelled(true);
                 return;
             }
@@ -271,30 +271,41 @@ public class WarpListener implements Listener {
 
     private void processNameChange(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            settingsGUI.removePendingNameChange(player.getUniqueId());
+            Warp warp = settingsGUI.removePendingNameChange(player.getUniqueId());
+            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
             messageManager.send(player, "prompt.enter_name_cancelled");
+            if (warp != null) {
+                settingsGUI.open(player, warp, fromSel);
+            }
             return;
         }
 
         Warp warp = settingsGUI.removePendingNameChange(player.getUniqueId());
         if (warp == null) return;
 
+        boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
         String newName = message.replace('&', '§');
         warp.setWarpName(newName);
         warpManager.saveWarp(warp);
         messageManager.send(player, "warp.name_changed", Map.of("name", newName));
-        settingsGUI.open(player, warp);
+        settingsGUI.open(player, warp, fromSel);
     }
 
     private void processCostAmount(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            settingsGUI.removePendingCostAmount(player.getUniqueId());
+            Warp warp = settingsGUI.removePendingCostAmount(player.getUniqueId());
+            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
             messageManager.send(player, "prompt.enter_name_cancelled");
+            if (warp != null) {
+                settingsGUI.open(player, warp, fromSel);
+            }
             return;
         }
 
         Warp warp = settingsGUI.removePendingCostAmount(player.getUniqueId());
         if (warp == null) return;
+
+        boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
 
         try {
             int amount = Integer.parseInt(message);
@@ -308,7 +319,7 @@ public class WarpListener implements Listener {
             messageManager.send(player, "warp.cost_changed",
                     Map.of("old", String.valueOf((int) oldCost),
                             "new", String.valueOf(amount)));
-            settingsGUI.open(player, warp);
+            settingsGUI.open(player, warp, fromSel);
         } catch (NumberFormatException e) {
             messageManager.send(player, "prompt.invalid_cost_amount");
         }
@@ -316,8 +327,12 @@ public class WarpListener implements Listener {
 
     private void processDeleteConfirm(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            settingsGUI.removePendingDeletion(player.getUniqueId());
+            Warp warp = settingsGUI.removePendingDeletion(player.getUniqueId());
+            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
             messageManager.send(player, "prompt.delete_cancelled");
+            if (warp != null) {
+                settingsGUI.open(player, warp, fromSel);
+            }
             return;
         }
 
@@ -328,6 +343,7 @@ public class WarpListener implements Listener {
 
         Warp warp = settingsGUI.removePendingDeletion(player.getUniqueId());
         if (warp == null) return;
+        settingsGUI.removePendingFromSelection(player.getUniqueId());
 
         warpManager.deleteWarp(warp);
         messageManager.send(player, "warp.deleted", Map.of("id", warp.getWarpId()));

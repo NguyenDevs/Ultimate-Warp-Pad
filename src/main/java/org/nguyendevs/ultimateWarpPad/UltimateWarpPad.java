@@ -73,6 +73,7 @@ public final class UltimateWarpPad extends JavaPlugin {
 
         warpSelectionGUI = new WarpSelectionGUI(this, warpManager, messageManager, configManager, animationManager, travelQueue);
         warpSelectionGUI.setSettingsGUI(settingsGUI);
+        settingsGUI.setWarpSelectionGUI(warpSelectionGUI);
 
         craftManager = new CraftManager(this);
         craftManager.load();

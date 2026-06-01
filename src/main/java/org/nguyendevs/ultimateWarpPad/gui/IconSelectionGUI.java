@@ -23,6 +23,7 @@ public class IconSelectionGUI {
     private static final int SLOT_PREV = 21;
     private static final int SLOT_INFO = 22;
     private static final int SLOT_NEXT = 23;
+    private static final int SLOT_RETURN = 26;
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
@@ -30,6 +31,7 @@ public class IconSelectionGUI {
     private final SettingsGUI settingsGUI;
     private final Map<UUID, Warp> editingWarps;
     private final Map<UUID, Integer> currentPage;
+    private final Map<UUID, Boolean> fromSettingsMap;
 
     public IconSelectionGUI(WarpManager warpManager, MessageManager messageManager,
                             ConfigManager configManager, SettingsGUI settingsGUI) {
@@ -39,10 +41,16 @@ public class IconSelectionGUI {
         this.settingsGUI = settingsGUI;
         this.editingWarps = new HashMap<>();
         this.currentPage = new HashMap<>();
+        this.fromSettingsMap = new HashMap<>();
     }
 
     public void open(Player player, Warp warp) {
+        open(player, warp, false);
+    }
+
+    public void open(Player player, Warp warp, boolean fromSettings) {
         editingWarps.put(player.getUniqueId(), warp);
+        fromSettingsMap.put(player.getUniqueId(), fromSettings);
         currentPage.putIfAbsent(player.getUniqueId(), 0);
 
         List<Material> icons = getAvailableIcons();
@@ -60,6 +68,7 @@ public class IconSelectionGUI {
         }
 
         inv.setItem(SLOT_INFO, createSimpleItem(Material.BEACON, "gui.icon_selection.info"));
+        inv.setItem(SLOT_RETURN, createReturnItem());
 
         player.openInventory(inv);
         player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f, 1.0f);
@@ -99,15 +108,29 @@ public class IconSelectionGUI {
 
         if (slot == SLOT_INFO) return true;
 
+        if (slot == SLOT_RETURN) {
+            Warp w = editingWarps.get(player.getUniqueId());
+            boolean fromSettings = fromSettingsMap.getOrDefault(player.getUniqueId(), false);
+            editingWarps.remove(player.getUniqueId());
+            currentPage.remove(player.getUniqueId());
+            fromSettingsMap.remove(player.getUniqueId());
+            if (w != null) {
+                settingsGUI.open(player, w, fromSettings);
+            }
+            return true;
+        }
+
         if (slot >= 0 && slot < ITEMS_PER_PAGE) {
             int index = page * ITEMS_PER_PAGE + slot;
             if (index < icons.size()) {
                 Material mat = icons.get(index);
                 warp.setIcon(mat);
                 warpManager.saveWarp(warp);
+                boolean fromSettings = fromSettingsMap.getOrDefault(player.getUniqueId(), false);
                 editingWarps.remove(player.getUniqueId());
                 currentPage.remove(player.getUniqueId());
-                settingsGUI.open(player, warp);
+                fromSettingsMap.remove(player.getUniqueId());
+                settingsGUI.open(player, warp, fromSettings);
             }
             return true;
         }
@@ -149,6 +172,19 @@ public class IconSelectionGUI {
         return item;
     }
 
+    private ItemStack createReturnItem() {
+        ItemStack item = new ItemStack(Material.STRUCTURE_VOID);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(messageManager.get("gui.icon_selection.return_button.name")
+                .decoration(TextDecoration.ITALIC, false));
+        List<Component> lore = messageManager.getComponentList("gui.icon_selection.return_button.lore").stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                .toList();
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public boolean isOpen(Player player) {
         return editingWarps.containsKey(player.getUniqueId());
     }
@@ -156,5 +192,6 @@ public class IconSelectionGUI {
     public void cleanup(Player player) {
         editingWarps.remove(player.getUniqueId());
         currentPage.remove(player.getUniqueId());
+        fromSettingsMap.remove(player.getUniqueId());
     }
 }

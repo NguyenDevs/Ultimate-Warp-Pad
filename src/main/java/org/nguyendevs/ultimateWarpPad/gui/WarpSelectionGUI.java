@@ -242,7 +242,7 @@ public class WarpSelectionGUI {
                 .decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         lore.add(messageManager.get("gui.warp_selection.settings_shortcut.warp_name",
-                Map.of("name", messageManager.translateColorCodes(warp.getWarpName())))
+                Map.of("name", warp.getWarpName()))
                 .decoration(TextDecoration.ITALIC, false));
         lore.addAll(messageManager.getComponentList("gui.warp_selection.settings_shortcut.lore").stream()
                 .map(c -> c.decoration(TextDecoration.ITALIC, false))
@@ -292,7 +292,7 @@ public class WarpSelectionGUI {
 
         if (slot == SLOT_SETTINGS) {
             if (sourceWarp.isOwner(player.getUniqueId()) && settingsGUI != null) {
-                settingsGUI.open(player, sourceWarp);
+                settingsGUI.open(player, sourceWarp, true);
             }
             return true;
         }
