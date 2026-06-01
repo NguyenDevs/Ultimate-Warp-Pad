@@ -21,9 +21,8 @@ public class IconSelectionGUI {
 
     private static final int ITEMS_PER_PAGE = 18;
     private static final int SLOT_PREV = 21;
-    private static final int SLOT_INFO = 22;
     private static final int SLOT_NEXT = 23;
-    private static final int SLOT_RETURN = 26;
+    private static final int SLOT_RETURN = 22;
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
@@ -67,7 +66,6 @@ public class IconSelectionGUI {
             inv.setItem(SLOT_NEXT, createSimpleItem(Material.ARROW, "gui.icon_selection.page_next"));
         }
 
-        inv.setItem(SLOT_INFO, createSimpleItem(Material.BEACON, "gui.icon_selection.info"));
         inv.setItem(SLOT_RETURN, createReturnItem());
 
         player.openInventory(inv);
@@ -105,8 +103,6 @@ public class IconSelectionGUI {
             }
             return true;
         }
-
-        if (slot == SLOT_INFO) return true;
 
         if (slot == SLOT_RETURN) {
             Warp w = editingWarps.get(player.getUniqueId());

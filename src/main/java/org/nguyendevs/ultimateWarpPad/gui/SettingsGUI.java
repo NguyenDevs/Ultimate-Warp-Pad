@@ -21,12 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SettingsGUI {
 
-    private static final int SLOT_ITEM1 = 10;
-    private static final int SLOT_ITEM2 = 12;
-    private static final int SLOT_ITEM4 = 14;
+    private static final int SLOT_ITEM1 = 9;
+    private static final int SLOT_ITEM2 = 11;
+    private static final int SLOT_ITEM4 = 13;
     private static final int SLOT_ICON = 15;
-    private static final int SLOT_DELETE = 16;
-    private static final int SLOT_RETURN_CLOSE = 26;
+    private static final int SLOT_DELETE = 17;
+    private static final int SLOT_RETURN_CLOSE = 22;
 
     private static final int[] ADMIN_RANGES = {-1, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
     private static final int[] PLAYER_RANGES = {50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000};

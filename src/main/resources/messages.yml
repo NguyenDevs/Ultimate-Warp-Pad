@@ -183,7 +183,6 @@ gui:
     title: "<gradient:#55FFFF:#FFFFFF>Select Icon</gradient>"
     page_previous: "&7← Previous"
     page_next: "&7Next →"
-    info: "&7Click any item to use it as the warp icon."
     return_button:
       name: "&7← Return"
       lore:
