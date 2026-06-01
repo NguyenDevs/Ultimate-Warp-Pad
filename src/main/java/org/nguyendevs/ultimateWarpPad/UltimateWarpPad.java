@@ -76,7 +76,7 @@ public final class UltimateWarpPad extends JavaPlugin {
         craftManager = new CraftManager(this);
         craftManager.load();
 
-        AdminWarpCommand adminCmd = new AdminWarpCommand(warpManager, configManager, messageManager, settingsGUI);
+        AdminWarpCommand adminCmd = new AdminWarpCommand(warpManager, configManager, messageManager, settingsGUI, craftManager);
         PlayerWarpCommand playerCmd = new PlayerWarpCommand(warpManager, messageManager, settingsGUI, configManager, craftManager);
 
         getCommand("wpa").setExecutor(adminCmd);

@@ -9,6 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
+import org.nguyendevs.ultimateWarpPad.manager.CraftManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
@@ -24,13 +25,15 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
     private final ConfigManager configManager;
     private final MessageManager messageManager;
     private final SettingsGUI settingsGUI;
+    private final CraftManager craftManager;
 
     public AdminWarpCommand(WarpManager warpManager, ConfigManager configManager, MessageManager messageManager,
-            SettingsGUI settingsGUI) {
+            SettingsGUI settingsGUI, CraftManager craftManager) {
         this.warpManager = warpManager;
         this.configManager = configManager;
         this.messageManager = messageManager;
         this.settingsGUI = settingsGUI;
+        this.craftManager = craftManager;
     }
 
     @Override
@@ -65,6 +68,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
     private void handleReload(CommandSender sender) {
         configManager.load();
         messageManager.load();
+        craftManager.load();
         messageManager.send(sender, "config.reloaded");
         playSuccessSound(sender);
     }
