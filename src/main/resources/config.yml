@@ -1,3 +1,4 @@
+# Database backend: sqlite or mysql
 database:
   type: sqlite
   mysql:
@@ -7,40 +8,61 @@ database:
     username: root
     password: ""
 
+# Notify ops when a new version is available
 update-notify: true
 
 warp:
+  # Y-level players are launched to during travel
   launch-y: 250
+  # Prevent players from moving while warping
   force-stay: true
+  # Cooldown between warps in seconds (-1 = disabled)
   cooldown: -1
+  # Snap player to the center of the warp pad on launch
   center: true
 
 group-teleport:
+  # Enable teleporting nearby players together
   enable: true
+  # Enable collision/stacking during group teleport
   collision: true
+  # Max players per group warp (-1 = unlimited)
   max-per-warp: -1
+  # Delay between each player launch in ticks
   delay-in-tick: 5
 
 effect:
+  # Apply darkness effect while warping
   apply-darkness: false
+  # Apply vanish/invisibility while warping
   apply-vanish: true
+  # Apply glowing effect while warping
   apply-glowing: true
+  # Apply regeneration effect while warping
   apply_regeneration: false
-  
 
 message:
+  # Send warp messages in chat
   chat: true
+  # Send warp messages in action bar
   action-bar: false
+  # Send warp messages in boss bar
   boss-bar: false
+  # Send warp messages as title/subtitle
   title: false
 
 particle:
+  # Enable warp pad particle effects
   enabled: true
+  # Particle type (see https://jd.papermc.io/paper/1.21/org/bukkit/Particle.html)
   type: END_ROD
+  # Particles displayed while idle
   idle-amount: 3
+  # Particles burst on warp trigger
   trigger-amount: 4
 
+# Max personal warps a player can create (overridable via uwp.user.create.<n> permission)
 max-warps-per-player: 20
 
+# Worlds where warp pads are disabled
 disabled-worlds: []
-
