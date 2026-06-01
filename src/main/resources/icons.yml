@@ -1,5 +1,3 @@
-# List of items players can choose as their warp pad icon.
-# You can add or remove any valid Minecraft Material name.
 icons:
   - NETHER_STAR
   - BEACON
