@@ -5,6 +5,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -240,7 +243,8 @@ public class MessageManager {
             }
             if (changed) {
                 serverConfig.save(file);
-                plugin.getLogger().info("Auto-updated messages.yml with missing keys.");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &aAuto-updated messages.yml with missing keys."));
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to auto-update messages.yml: " + e.getMessage());
