@@ -8,6 +8,9 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldedit.math.BlockVector3;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -93,7 +96,8 @@ public class WarpManager {
                 warps.put(warp.getCompositeId(), warp);
                 indexWarp(warp);
             }
-            plugin.getLogger().info("Loaded " + loaded.size() + " warps");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&3[&bUltimateWarpPad&3] &eLoaded " + loaded.size() + " &ewarps"));
         });
     }
 
