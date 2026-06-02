@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -26,7 +27,7 @@ import org.nguyendevs.ultimateWarpPad.travel.TravelTask;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WarpSelectionGUI {
+public class WarpSelectionGUI implements InventoryHolder {
 
     private static final int ITEMS_PER_PAGE = 18;
     private static final int SLOT_PREV = 21;
@@ -93,7 +94,7 @@ public class WarpSelectionGUI {
             page = 0;
         currentPage.put(uuid, page);
 
-        Inventory inv = Bukkit.createInventory(null, 27,
+        Inventory inv = Bukkit.createInventory(this, 27,
                 messageManager.get("gui.warp_selection.title"));
 
         int start = page * ITEMS_PER_PAGE;
@@ -541,6 +542,11 @@ public class WarpSelectionGUI {
 
     public boolean hasOpen(Player player) {
         return openSelections.containsKey(player.getUniqueId());
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 
     public void cleanup(Player player) {

@@ -1,6 +1,5 @@
 package org.nguyendevs.ultimateWarpPad.listener;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -204,12 +203,8 @@ public class WarpListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        Component title = event.getView().title();
-        Component settingsTitle = messageManager.get("gui.settings.title");
-        Component selectionTitle = messageManager.get("gui.warp_selection.title");
-        Component iconTitle = messageManager.get("gui.icon_selection.title");
 
-        if (title.equals(settingsTitle)) {
+        if (event.getInventory().getHolder(false) instanceof SettingsGUI) {
             event.setCancelled(true);
 
             if (event.getSlot() >= 0 && event.getCurrentItem() != null) {
@@ -218,7 +213,7 @@ public class WarpListener implements Listener {
             return;
         }
 
-        if (title.equals(selectionTitle)) {
+        if (event.getInventory().getHolder(false) instanceof WarpSelectionGUI) {
             event.setCancelled(true);
 
             if (event.getSlot() >= 0 && event.getCurrentItem() != null) {
@@ -227,7 +222,7 @@ public class WarpListener implements Listener {
             return;
         }
 
-        if (title.equals(iconTitle)) {
+        if (event.getInventory().getHolder(false) instanceof IconSelectionGUI) {
             event.setCancelled(true);
 
             if (event.getSlot() >= 0) {
@@ -239,9 +234,7 @@ public class WarpListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        Component title = event.getView().title();
-        Component settingsTitle = messageManager.get("gui.settings.title");
-        if (!title.equals(settingsTitle)) return;
+        if (!(event.getInventory().getHolder(false) instanceof SettingsGUI)) return;
 
         for (int slot : event.getRawSlots()) {
             if (slot >= 0 && slot < 27) {

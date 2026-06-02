@@ -8,6 +8,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
@@ -19,7 +20,7 @@ import org.nguyendevs.ultimateWarpPad.model.WarpType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SettingsGUI {
+public class SettingsGUI implements InventoryHolder {
 
     private static final int SLOT_ITEM1 = 9;
     private static final int SLOT_ITEM2 = 11;
@@ -66,7 +67,7 @@ public class SettingsGUI {
     }
 
     public void open(Player player, Warp warp, boolean fromSelection) {
-        Inventory inv = Bukkit.createInventory(null, 27,
+        Inventory inv = Bukkit.createInventory(this, 27,
                 messageManager.get("gui.settings.title"));
 
         if (warp.getType() == WarpType.PLAYER) {
@@ -424,6 +425,11 @@ public class SettingsGUI {
 
     public boolean removePendingFromSelection(UUID playerUUID) {
         return pendingFromSelection.remove(playerUUID);
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 
     public void cleanup(Player player) {

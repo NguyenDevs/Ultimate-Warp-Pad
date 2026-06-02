@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
@@ -17,7 +18,7 @@ import org.nguyendevs.ultimateWarpPad.model.Warp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class IconSelectionGUI {
+public class IconSelectionGUI implements InventoryHolder {
 
     private static final int ITEMS_PER_PAGE = 18;
     private static final int SLOT_PREV = 21;
@@ -56,7 +57,7 @@ public class IconSelectionGUI {
         int page = currentPage.getOrDefault(player.getUniqueId(), 0);
         int totalPages = (icons.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
 
-        Inventory inv = Bukkit.createInventory(null, 27,
+        Inventory inv = Bukkit.createInventory(this, 27,
                 messageManager.get("gui.icon_selection.title"));
 
         fillIcons(inv, icons, page);
@@ -183,6 +184,11 @@ public class IconSelectionGUI {
 
     public boolean isOpen(Player player) {
         return editingWarps.containsKey(player.getUniqueId());
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 
     public void cleanup(Player player) {
