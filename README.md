@@ -30,3 +30,7 @@ Bring the magic of the Crystal Gems to your Minecraft server! Ultimate Warp Pad 
 - **/wpp delete <warp_id>** - Deletes an existing warp pad.
 - **/wpp setting [warp_id]** - Setting your warp pad you standing on it.
 - **/wpp trust <warp_id> <player>** - Add a player into your private warp network.
+
+**Other Permisisons:**
+- Add `uwp.user.create.<n>` Override max warps per player. Replace `<n>` with a number.
+- `Add uwp.user.range.<n>` Add a custom range option to the range cycle. Replace `<n>` with a number.
