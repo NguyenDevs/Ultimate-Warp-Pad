@@ -150,9 +150,7 @@ public class WarpManager {
         return null;
     }
 
-    public List<Warp> getAvailableDestinations(Warp sourceWarp, Player player) {
-        UUID playerUUID = player.getUniqueId();
-
+    public List<Warp> getAvailableDestinations(Warp sourceWarp, UUID playerUUID) {
         if (sourceWarp.isAdminWarp()) {
             List<Warp> destinations = new ArrayList<>(getAdminWarps());
             destinations.remove(sourceWarp);

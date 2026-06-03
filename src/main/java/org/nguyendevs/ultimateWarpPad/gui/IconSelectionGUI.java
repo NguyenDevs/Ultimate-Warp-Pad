@@ -2,139 +2,59 @@ package org.nguyendevs.ultimateWarpPad.gui;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
+import org.nguyendevs.ultimateWarpPad.util.AbstractGUI;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class IconSelectionGUI implements InventoryHolder {
-
+public class IconSelectionGUI {
     private static final int ITEMS_PER_PAGE = 18;
     private static final int SLOT_PREV = 21;
     private static final int SLOT_NEXT = 23;
     private static final int SLOT_RETURN = 22;
+    private static final int INVENTORY_SIZE = 27;
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
     private final ConfigManager configManager;
     private final SettingsGUI settingsGUI;
-    private final Map<UUID, Warp> editingWarps;
-    private final Map<UUID, Integer> currentPage;
-    private final Map<UUID, Boolean> fromSettingsMap;
 
-    public IconSelectionGUI(WarpManager warpManager, MessageManager messageManager,
-                            ConfigManager configManager, SettingsGUI settingsGUI) {
+    public IconSelectionGUI(@NotNull WarpManager warpManager,
+                            @NotNull MessageManager messageManager,
+                            @NotNull ConfigManager configManager,
+                            @NotNull SettingsGUI settingsGUI) {
         this.warpManager = warpManager;
         this.messageManager = messageManager;
         this.configManager = configManager;
         this.settingsGUI = settingsGUI;
-        this.editingWarps = new HashMap<>();
-        this.currentPage = new HashMap<>();
-        this.fromSettingsMap = new HashMap<>();
     }
 
-    public void open(Player player, Warp warp) {
-        open(player, warp, false);
+    public void open(@NotNull Player player,
+                     @NotNull Warp editingWarp) {
+        open(player, editingWarp, false);
     }
 
-    public void open(Player player, Warp warp, boolean fromSettings) {
-        editingWarps.put(player.getUniqueId(), warp);
-        fromSettingsMap.put(player.getUniqueId(), fromSettings);
-        currentPage.putIfAbsent(player.getUniqueId(), 0);
-
-        List<Material> icons = getAvailableIcons();
-        int page = currentPage.getOrDefault(player.getUniqueId(), 0);
-        int totalPages = (icons.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-
-        Inventory inv = Bukkit.createInventory(this, 27,
-                messageManager.get("gui.icon_selection.title"));
-
-        fillIcons(inv, icons, page);
-
-        if (totalPages > 1) {
-            inv.setItem(SLOT_PREV, createSimpleItem(Material.ARROW, "gui.icon_selection.page_previous"));
-            inv.setItem(SLOT_NEXT, createSimpleItem(Material.ARROW, "gui.icon_selection.page_next"));
-        }
-
-        inv.setItem(SLOT_RETURN, createReturnItem());
-
-        player.openInventory(inv);
-        player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f, 1.0f);
+    public void open(@NotNull Player player,
+                     @NotNull Warp editingWarp,
+                     boolean fromSettings) {
+        new GUI(editingWarp, fromSettings).open(player);
     }
 
-    public void refresh(Player player) {
-        Warp warp = editingWarps.get(player.getUniqueId());
-        if (warp == null) return;
-        open(player, warp);
-    }
-
-    public boolean handleClick(Player player, int slot) {
-        Warp warp = editingWarps.get(player.getUniqueId());
-        if (warp == null) return false;
-
-        player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
-
-        List<Material> icons = getAvailableIcons();
-        int totalPages = (icons.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        int page = currentPage.getOrDefault(player.getUniqueId(), 0);
-
-        if (slot == SLOT_PREV) {
-            if (page > 0) {
-                currentPage.put(player.getUniqueId(), page - 1);
-                refresh(player);
-            }
-            return true;
-        }
-
-        if (slot == SLOT_NEXT) {
-            if (page < totalPages - 1) {
-                currentPage.put(player.getUniqueId(), page + 1);
-                refresh(player);
-            }
-            return true;
-        }
-
-        if (slot == SLOT_RETURN) {
-            Warp w = editingWarps.get(player.getUniqueId());
-            boolean fromSettings = fromSettingsMap.getOrDefault(player.getUniqueId(), false);
-            editingWarps.remove(player.getUniqueId());
-            currentPage.remove(player.getUniqueId());
-            fromSettingsMap.remove(player.getUniqueId());
-            if (w != null) {
-                settingsGUI.open(player, w, fromSettings);
-            }
-            return true;
-        }
-
-        if (slot >= 0 && slot < ITEMS_PER_PAGE) {
-            int index = page * ITEMS_PER_PAGE + slot;
-            if (index < icons.size()) {
-                Material mat = icons.get(index);
-                warp.setIcon(mat);
-                warpManager.saveWarp(warp);
-                boolean fromSettings = fromSettingsMap.getOrDefault(player.getUniqueId(), false);
-                editingWarps.remove(player.getUniqueId());
-                currentPage.remove(player.getUniqueId());
-                fromSettingsMap.remove(player.getUniqueId());
-                settingsGUI.open(player, warp, fromSettings);
-            }
-            return true;
-        }
-
-        return true;
-    }
-
+    //TODO cache this and invalidate on config reload
+    @NotNull
     private List<Material> getAvailableIcons() {
         return configManager.getWaypointIcons().stream()
                 .map(name -> {
@@ -148,20 +68,30 @@ public class IconSelectionGUI implements InventoryHolder {
                 .collect(Collectors.toList());
     }
 
-    private void fillIcons(Inventory inv, List<Material> icons, int page) {
+    private void fillIcons(@NotNull Inventory inv,
+                           @NotNull List<@NotNull Material> icons,
+                           int page) {
         int start = page * ITEMS_PER_PAGE;
         int end = Math.min(start + ITEMS_PER_PAGE, icons.size());
-        for (int i = start; i < end; i++) {
-            ItemStack item = new ItemStack(icons.get(i));
-            ItemMeta meta = item.getItemMeta();
-            meta.displayName(Component.text(icons.get(i).name())
-                    .decoration(TextDecoration.ITALIC, false));
-            item.setItemMeta(meta);
-            inv.setItem(i - start, item);
+        for (int slot = 0; slot < ITEMS_PER_PAGE; slot++) {
+            int index = start + slot;
+            if (index < end) {
+                Material mat = icons.get(index);
+                ItemStack item = new ItemStack(mat);
+                ItemMeta meta = item.getItemMeta();
+                meta.displayName(Component.text(mat.name())
+                        .decoration(TextDecoration.ITALIC, false));
+                item.setItemMeta(meta);
+                inv.setItem(slot, item);
+            } else {
+                inv.setItem(slot, null);
+            }
         }
     }
 
-    private ItemStack createSimpleItem(Material mat, String namePath) {
+    @NotNull
+    private ItemStack createSimpleItem(@NotNull Material mat,
+                                       @NotNull String namePath) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(messageManager.get(namePath).decoration(TextDecoration.ITALIC, false));
@@ -169,6 +99,7 @@ public class IconSelectionGUI implements InventoryHolder {
         return item;
     }
 
+    @NotNull
     private ItemStack createReturnItem() {
         ItemStack item = new ItemStack(Material.STRUCTURE_VOID);
         ItemMeta meta = item.getItemMeta();
@@ -182,18 +113,67 @@ public class IconSelectionGUI implements InventoryHolder {
         return item;
     }
 
-    public boolean isOpen(Player player) {
-        return editingWarps.containsKey(player.getUniqueId());
-    }
 
-    @Override
-    public Inventory getInventory() {
-        return null;
-    }
+    private class GUI extends AbstractGUI {
+        private final Warp editingWarp;
+        private final boolean fromSettings;
+        private int currentPage;
 
-    public void cleanup(Player player) {
-        editingWarps.remove(player.getUniqueId());
-        currentPage.remove(player.getUniqueId());
-        fromSettingsMap.remove(player.getUniqueId());
+        //TODO invalidate on config reload?
+        private final List<Material> icons;
+        private final int totalPages;
+
+        public GUI(@NotNull Warp editingWarp, boolean fromSettings) {
+            super(INVENTORY_SIZE, messageManager.get("gui.icon_selection.title"));
+            this.editingWarp = editingWarp;
+            this.fromSettings = fromSettings;
+            this.currentPage = 0;
+
+            icons = getAvailableIcons();
+            totalPages = (icons.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+            if (totalPages > 1) {
+                inventory.setItem(SLOT_PREV, createSimpleItem(Material.ARROW, "gui.icon_selection.page_previous"));
+                inventory.setItem(SLOT_NEXT, createSimpleItem(Material.ARROW, "gui.icon_selection.page_next"));
+            }
+            inventory.setItem(SLOT_RETURN, createReturnItem());
+
+            fillIcons(inventory, icons, currentPage);
+        }
+
+        @Override
+        public void handleClick(@NotNull InventoryClickEvent event) {
+            int slot = event.getSlot();
+
+            Player player = (Player) event.getWhoClicked();
+            player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
+
+            switch (slot) {
+                case SLOT_PREV -> {
+                    if (currentPage <= 0)
+                        return;
+
+                    fillIcons(inventory, icons, --currentPage);
+                }
+                case SLOT_NEXT -> {
+                    if (currentPage >= totalPages - 1)
+                        return;
+
+                    fillIcons(inventory, icons, ++currentPage);
+                }
+                case SLOT_RETURN -> settingsGUI.open(player, editingWarp, fromSettings);
+                default -> {
+                    if (slot >= ITEMS_PER_PAGE)
+                        return;
+
+                    int index = currentPage * ITEMS_PER_PAGE + slot;
+                    if (index >= icons.size())
+                        return;
+
+                    editingWarp.setIcon(icons.get(index));
+                    warpManager.saveWarp(editingWarp);
+                    settingsGUI.open(player, editingWarp, fromSettings);
+                }
+            }
+        }
     }
 }

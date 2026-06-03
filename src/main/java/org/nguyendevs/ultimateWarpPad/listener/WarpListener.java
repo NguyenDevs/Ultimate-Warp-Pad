@@ -17,8 +17,8 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.nguyendevs.ultimateWarpPad.UltimateWarpPad;
-import org.nguyendevs.ultimateWarpPad.gui.IconSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
+import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI.PendingData;
 import org.nguyendevs.ultimateWarpPad.gui.WarpSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.CraftManager;
@@ -27,6 +27,7 @@ import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
 import org.nguyendevs.ultimateWarpPad.model.WarpType;
+import org.nguyendevs.ultimateWarpPad.util.AbstractGUI;
 
 import java.util.*;
 
@@ -38,21 +39,19 @@ public class WarpListener implements Listener {
     private final ConfigManager configManager;
     private final WarpSelectionGUI warpSelectionGUI;
     private final SettingsGUI settingsGUI;
-    private final IconSelectionGUI iconSelectionGUI;
     private CraftManager craftManager;
 
     private final Map<UUID, Warp> playerOnWarp;
 
     public WarpListener(UltimateWarpPad plugin, WarpManager warpManager, MessageManager messageManager,
                         ConfigManager configManager, WarpSelectionGUI warpSelectionGUI,
-                        SettingsGUI settingsGUI, IconSelectionGUI iconSelectionGUI) {
+                        SettingsGUI settingsGUI) {
         this.plugin = plugin;
         this.warpManager = warpManager;
         this.messageManager = messageManager;
         this.configManager = configManager;
         this.warpSelectionGUI = warpSelectionGUI;
         this.settingsGUI = settingsGUI;
-        this.iconSelectionGUI = iconSelectionGUI;
         this.playerOnWarp = new HashMap<>();
     }
 
@@ -202,46 +201,27 @@ public class WarpListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-
-        if (event.getInventory().getHolder(false) instanceof SettingsGUI) {
-            event.setCancelled(true);
-
-            if (event.getSlot() >= 0 && event.getCurrentItem() != null) {
-                settingsGUI.handleClick(player, event.getSlot(), event.getClick(), event.getCursor());
-            }
+        if (!(event.getInventory().getHolder(false) instanceof AbstractGUI gui))
             return;
-        }
 
-        if (event.getInventory().getHolder(false) instanceof WarpSelectionGUI) {
-            event.setCancelled(true);
-
-            if (event.getSlot() >= 0 && event.getCurrentItem() != null) {
-                warpSelectionGUI.handleClick(player, event.getSlot());
-            }
+        event.setCancelled(true);
+        if (event.getClickedInventory() != event.getInventory())
             return;
-        }
 
-        if (event.getInventory().getHolder(false) instanceof IconSelectionGUI) {
-            event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player))
+            return;
 
-            if (event.getSlot() >= 0) {
-                iconSelectionGUI.handleClick(player, event.getSlot());
-            }
-        }
+        ItemStack item = event.getCurrentItem();
+        if (item == null || item.isEmpty())
+            return;
+
+        gui.handleClick(event);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!(event.getInventory().getHolder(false) instanceof SettingsGUI)) return;
-
-        for (int slot : event.getRawSlots()) {
-            if (slot >= 0 && slot < 27) {
-                event.setCancelled(true);
-                return;
-            }
-        }
+        if (event.getInventory().getHolder(false) instanceof AbstractGUI)
+            event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -268,41 +248,38 @@ public class WarpListener implements Listener {
 
     private void processNameChange(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            Warp warp = settingsGUI.removePendingNameChange(player.getUniqueId());
-            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
+            PendingData data = settingsGUI.removePendingNameChange(player.getUniqueId());
             messageManager.send(player, "prompt.enter_name_cancelled");
-            if (warp != null) {
-                settingsGUI.open(player, warp, fromSel);
+            if (data != null) {
+                settingsGUI.open(player, data);
             }
             return;
         }
 
-        Warp warp = settingsGUI.removePendingNameChange(player.getUniqueId());
-        if (warp == null) return;
+        PendingData data = settingsGUI.removePendingNameChange(player.getUniqueId());
+        if (data == null) return;
 
-        boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
+        Warp warp = data.warp();
         String newName = message.replace('&', '§');
         warp.setWarpName(newName);
         warpManager.saveWarp(warp);
         messageManager.send(player, "warp.name_changed", Map.of("name", newName));
-        settingsGUI.open(player, warp, fromSel);
+        settingsGUI.open(player, data);
     }
 
     private void processCostAmount(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            Warp warp = settingsGUI.removePendingCostAmount(player.getUniqueId());
-            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
+            PendingData data = settingsGUI.removePendingCostAmount(player.getUniqueId());
             messageManager.send(player, "prompt.enter_name_cancelled");
-            if (warp != null) {
-                settingsGUI.open(player, warp, fromSel);
+            if (data != null) {
+                settingsGUI.open(player, data);
             }
             return;
         }
 
-        Warp warp = settingsGUI.removePendingCostAmount(player.getUniqueId());
-        if (warp == null) return;
-
-        boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
+        PendingData data = settingsGUI.removePendingCostAmount(player.getUniqueId());
+        if (data == null) return;
+        Warp warp = data.warp();
 
         try {
             int amount = Integer.parseInt(message);
@@ -316,7 +293,7 @@ public class WarpListener implements Listener {
             messageManager.send(player, "warp.cost_changed",
                     Map.of("old", String.valueOf((int) oldCost),
                             "new", String.valueOf(amount)));
-            settingsGUI.open(player, warp, fromSel);
+            settingsGUI.open(player, data);
         } catch (NumberFormatException e) {
             messageManager.send(player, "prompt.invalid_cost_amount");
         }
@@ -324,11 +301,10 @@ public class WarpListener implements Listener {
 
     private void processDeleteConfirm(Player player, String message) {
         if (message.equalsIgnoreCase("cancel")) {
-            Warp warp = settingsGUI.removePendingDeletion(player.getUniqueId());
-            boolean fromSel = settingsGUI.removePendingFromSelection(player.getUniqueId());
+            PendingData data = settingsGUI.removePendingDeletion(player.getUniqueId());
             messageManager.send(player, "prompt.delete_cancelled");
-            if (warp != null) {
-                settingsGUI.open(player, warp, fromSel);
+            if (data != null) {
+                settingsGUI.open(player, data);
             }
             return;
         }
@@ -338,9 +314,9 @@ public class WarpListener implements Listener {
             return;
         }
 
-        Warp warp = settingsGUI.removePendingDeletion(player.getUniqueId());
-        if (warp == null) return;
-        settingsGUI.removePendingFromSelection(player.getUniqueId());
+        PendingData data = settingsGUI.removePendingDeletion(player.getUniqueId());
+        if (data == null) return;
+        Warp warp = data.warp();
 
         warpManager.deleteWarp(warp);
         messageManager.send(player, "warp.deleted", Map.of("id", warp.getWarpId()));
@@ -364,9 +340,7 @@ public class WarpListener implements Listener {
         UUID uuid = player.getUniqueId();
         playerOnWarp.remove(uuid);
         UltimateWarpPad.FALL_DAMAGE_IMMUNE.remove(uuid);
-        warpSelectionGUI.cleanup(player);
         settingsGUI.cleanup(player);
-        iconSelectionGUI.cleanup(player);
     }
 
     public void cleanup() {

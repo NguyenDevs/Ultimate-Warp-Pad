@@ -12,7 +12,6 @@ import org.nguyendevs.ultimateWarpPad.gui.WarpSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.listener.WarpListener;
 import org.nguyendevs.ultimateWarpPad.manager.*;
 import org.nguyendevs.ultimateWarpPad.travel.TravelQueue;
-import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
 import org.nguyendevs.ultimateWarpPad.util.SpigotPlugin;
 
 import java.util.Set;
@@ -71,8 +70,7 @@ public final class UltimateWarpPad extends JavaPlugin {
         travelQueue = new TravelQueue(entry -> Bukkit.getScheduler().runTask(this, () ->
                 warpSelectionGUI.startTravel(entry.player(), entry.source(), entry.destination())));
 
-        warpSelectionGUI = new WarpSelectionGUI(this, warpManager, messageManager, configManager, animationManager, travelQueue);
-        warpSelectionGUI.setSettingsGUI(settingsGUI);
+        warpSelectionGUI = new WarpSelectionGUI(this, warpManager, messageManager, configManager, animationManager, travelQueue, settingsGUI);
         settingsGUI.setWarpSelectionGUI(warpSelectionGUI);
 
         craftManager = new CraftManager(this);
@@ -87,7 +85,7 @@ public final class UltimateWarpPad extends JavaPlugin {
         getCommand("wpp").setTabCompleter(playerCmd);
 
         warpListener = new WarpListener(this, warpManager, messageManager, configManager,
-                warpSelectionGUI, settingsGUI, iconSelectionGUI);
+                warpSelectionGUI, settingsGUI);
         warpListener.setCraftManager(craftManager);
         Bukkit.getPluginManager().registerEvents(warpListener, this);
 
