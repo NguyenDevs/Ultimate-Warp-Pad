@@ -7,12 +7,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 import org.nguyendevs.ultimateWarpPad.manager.AnimationManager;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
@@ -23,103 +24,57 @@ import org.nguyendevs.ultimateWarpPad.model.WarpType;
 import org.nguyendevs.ultimateWarpPad.travel.GroupTravelSession;
 import org.nguyendevs.ultimateWarpPad.travel.TravelQueue;
 import org.nguyendevs.ultimateWarpPad.travel.TravelTask;
+import org.nguyendevs.ultimateWarpPad.util.AbstractGUI;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WarpSelectionGUI implements InventoryHolder {
-
+public class WarpSelectionGUI {
     private static final int ITEMS_PER_PAGE = 18;
     private static final int SLOT_PREV = 21;
     private static final int SLOT_BEACON = 22;
     private static final int SLOT_NEXT = 23;
     private static final int SLOT_SETTINGS = 26;
+    private static final int INVENTORY_SIZE = 27;
 
+    private final JavaPlugin plugin;
     private final WarpManager warpManager;
     private final MessageManager messageManager;
     private final ConfigManager configManager;
     private final AnimationManager animationManager;
-    private final org.bukkit.plugin.java.JavaPlugin plugin;
-    private final Map<UUID, Warp> openSelections;
-    private final Map<UUID, Long> cooldowns;
-    private final Map<UUID, Integer> currentPage;
-    private final Map<UUID, Integer> filterMode;
-    private final TravelQueue travelQueue;
-    private SettingsGUI settingsGUI;
 
-    public WarpSelectionGUI(org.bukkit.plugin.java.JavaPlugin plugin, WarpManager warpManager,
-            MessageManager messageManager, ConfigManager configManager,
-            AnimationManager animationManager, TravelQueue travelQueue) {
+    private final Map<UUID, Long> cooldowns;
+    private final TravelQueue travelQueue;
+    private final SettingsGUI settingsGUI;
+
+    public WarpSelectionGUI(JavaPlugin plugin,
+                            WarpManager warpManager,
+                            MessageManager messageManager,
+                            ConfigManager configManager,
+                            AnimationManager animationManager,
+                            TravelQueue travelQueue,
+                            SettingsGUI settingsGUI) {
         this.plugin = plugin;
         this.warpManager = warpManager;
         this.messageManager = messageManager;
         this.configManager = configManager;
         this.animationManager = animationManager;
-        this.travelQueue = travelQueue;
-        this.openSelections = new HashMap<>();
         this.cooldowns = new HashMap<>();
-        this.currentPage = new HashMap<>();
-        this.filterMode = new HashMap<>();
+        this.travelQueue = travelQueue;
+        this.settingsGUI = settingsGUI;
     }
 
     public void updateCooldown(UUID uuid) {
         cooldowns.put(uuid, System.currentTimeMillis());
     }
 
-    public void setSettingsGUI(SettingsGUI settingsGUI) {
-        this.settingsGUI = settingsGUI;
-    }
-
     public void open(Player player, Warp sourceWarp) {
-        UUID uuid = player.getUniqueId();
-        openSelections.put(uuid, sourceWarp);
-        currentPage.put(uuid, 0);
-        filterMode.put(uuid, 0);
-        rebuildGUI(player);
+        new GUI(player.getUniqueId(), sourceWarp).open(player);
     }
 
-    private void rebuildGUI(Player player) {
-        UUID uuid = player.getUniqueId();
-        Warp sourceWarp = openSelections.get(uuid);
-        if (sourceWarp == null)
-            return;
-
-        List<Warp> allDestinations = getFilteredDestinations(player, sourceWarp);
-
-        int page = currentPage.getOrDefault(uuid, 0);
-        int totalPages = allDestinations.isEmpty() ? 1 : (allDestinations.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        if (page >= totalPages)
-            page = totalPages - 1;
-        if (page < 0)
-            page = 0;
-        currentPage.put(uuid, page);
-
-        Inventory inv = Bukkit.createInventory(this, 27,
-                messageManager.get("gui.warp_selection.title"));
-
-        int start = page * ITEMS_PER_PAGE;
-        int end = Math.min(start + ITEMS_PER_PAGE, allDestinations.size());
-        for (int i = start; i < end; i++) {
-            inv.setItem(i - start, createWarpItem(allDestinations.get(i), sourceWarp));
-        }
-
-        if (totalPages > 1) {
-            inv.setItem(SLOT_PREV, createSimpleItem(Material.ARROW, "gui.warp_selection.page_previous"));
-            inv.setItem(SLOT_NEXT, createSimpleItem(Material.ARROW, "gui.warp_selection.page_next"));
-        }
-
-        inv.setItem(SLOT_BEACON, createBeaconItem(player, sourceWarp));
-
-        if (sourceWarp.isOwner(player.getUniqueId())) {
-            inv.setItem(SLOT_SETTINGS, createSettingsShortcutItem(sourceWarp));
-        }
-
-        player.openInventory(inv);
-        player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f,
-                1.0f);
-    }
-
-    private ItemStack createSimpleItem(Material mat, String namePath) {
+    @NotNull
+    private ItemStack createSimpleItem(@NotNull Material mat,
+                                       @NotNull String namePath) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(messageManager.get(namePath).decoration(TextDecoration.ITALIC, false));
@@ -127,11 +82,10 @@ public class WarpSelectionGUI implements InventoryHolder {
         return item;
     }
 
-    private ItemStack createBeaconItem(Player player, Warp sourceWarp) {
-        UUID uuid = player.getUniqueId();
+    @NotNull
+    private ItemStack createBeaconItem(@NotNull Warp sourceWarp, int mode) {
         boolean isAdmin = sourceWarp.isAdminWarp();
 
-        int mode = filterMode.getOrDefault(uuid, 0);
         List<String> modeNames = messageManager.getRawList(isAdmin
                 ? "gui.warp_selection.filter_modes_admin"
                 : "gui.warp_selection.filter_modes_player");
@@ -146,9 +100,9 @@ public class WarpSelectionGUI implements InventoryHolder {
                         : "gui.warp_selection.beacon.player_name")
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(messageManager.getComponentList(isAdmin
-                        ? "gui.warp_selection.beacon.admin_lore"
-                        : "gui.warp_selection.beacon.player_lore",
-                Map.of("mode", modeName)).stream()
+                                ? "gui.warp_selection.beacon.admin_lore"
+                                : "gui.warp_selection.beacon.player_lore",
+                        Map.of("mode", modeName)).stream()
                 .map(c -> c.decoration(TextDecoration.ITALIC, false))
                 .collect(Collectors.toList()));
 
@@ -156,6 +110,7 @@ public class WarpSelectionGUI implements InventoryHolder {
         return item;
     }
 
+    @NotNull
     private Material getModeIcon(int mode) {
         return switch (mode) {
             case 0 -> Material.BEACON;
@@ -164,16 +119,16 @@ public class WarpSelectionGUI implements InventoryHolder {
         };
     }
 
-    private List<Warp> getFilteredDestinations(Player player, Warp sourceWarp) {
-        UUID uuid = player.getUniqueId();
-
+    @NotNull
+    private List<Warp> getFilteredDestinations(@NotNull UUID playerUUID,
+                                               @NotNull Warp sourceWarp,
+                                               int mode) {
         if (sourceWarp.isAdminWarp()) {
-            int mode = filterMode.getOrDefault(uuid, 0);
-            List<Warp> all = warpManager.getAvailableDestinations(sourceWarp, player);
+            List<Warp> all = warpManager.getAvailableDestinations(sourceWarp, playerUUID);
 
             return switch (mode) {
                 case 0 -> all.stream().filter(w -> w.getType() == WarpType.ADMIN).collect(Collectors.toList());
-                case 1 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isOwner(uuid))
+                case 1 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isOwner(playerUUID))
                         .collect(Collectors.toList());
                 case 2 -> all.stream().filter(w -> w.getType() == WarpType.PLAYER && w.isPublic())
                         .collect(Collectors.toList());
@@ -182,14 +137,13 @@ public class WarpSelectionGUI implements InventoryHolder {
         }
 
         boolean connect = configManager.isConnectPrivateTrusted();
-        int mode = filterMode.getOrDefault(uuid, 0);
 
         if (mode == 0) {
-            if (sourceWarp.isOwner(uuid)) {
-                return warpManager.getAvailableDestinations(sourceWarp, player);
+            if (sourceWarp.isOwner(playerUUID)) {
+                return warpManager.getAvailableDestinations(sourceWarp, playerUUID);
             }
-            if (connect && sourceWarp.canPlayerUse(uuid)) {
-                return warpManager.getPlayerWarps(uuid).stream()
+            if (connect && sourceWarp.canPlayerUse(playerUUID)) {
+                return warpManager.getPlayerWarps(playerUUID).stream()
                         .filter(w -> !w.getCompositeId().equals(sourceWarp.getCompositeId()))
                         .filter(w -> warpManager.isInRange(sourceWarp, w))
                         .collect(Collectors.toList());
@@ -197,26 +151,27 @@ public class WarpSelectionGUI implements InventoryHolder {
             return Collections.emptyList();
         }
 
-        if (sourceWarp.canPlayerUse(uuid) && !sourceWarp.isOwner(uuid)) {
+        if (sourceWarp.canPlayerUse(playerUUID) && !sourceWarp.isOwner(playerUUID)) {
             UUID owner = sourceWarp.getOwner();
             return warpManager.getAllWarps().stream()
                     .filter(w -> w.getOwner() != null && w.getOwner().equals(owner))
-                    .filter(w -> w.canPlayerUse(uuid))
+                    .filter(w -> w.canPlayerUse(playerUUID))
                     .filter(w -> !w.getCompositeId().equals(sourceWarp.getCompositeId()))
                     .filter(w -> warpManager.isInRange(sourceWarp, w))
                     .collect(Collectors.toList());
         }
-        if (connect && sourceWarp.isOwner(uuid)) {
+        if (connect && sourceWarp.isOwner(playerUUID)) {
             return warpManager.getAllWarps().stream()
-                    .filter(w -> w.getOwner() != null && !w.getOwner().equals(uuid))
-                    .filter(w -> w.canPlayerUse(uuid))
+                    .filter(w -> w.getOwner() != null && !w.getOwner().equals(playerUUID))
+                    .filter(w -> w.canPlayerUse(playerUUID))
                     .filter(w -> warpManager.isInRange(sourceWarp, w))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
-    private ItemStack createWarpItem(Warp warp, Warp sourceWarp) {
+    @NotNull
+    private ItemStack createWarpItem(@NotNull Warp warp, @NotNull Warp sourceWarp) {
         boolean busy = travelQueue.isBusy(warp);
         Material icon = busy ? Material.ENDER_PEARL : (warp.getIcon() != null ? warp.getIcon() : Material.NETHER_STAR);
         ItemStack item = new ItemStack(icon);
@@ -246,14 +201,15 @@ public class WarpSelectionGUI implements InventoryHolder {
         return item;
     }
 
-    private ItemStack createSettingsShortcutItem(Warp warp) {
+    @NotNull
+    private ItemStack createSettingsShortcutItem(@NotNull Warp warp) {
         ItemStack item = new ItemStack(Material.PRISMARINE_CRYSTALS);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(messageManager.get("gui.warp_selection.settings_shortcut.name")
                 .decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         lore.add(messageManager.get("gui.warp_selection.settings_shortcut.warp_name",
-                Map.of("name", warp.getWarpName()))
+                        Map.of("name", warp.getWarpName()))
                 .decoration(TextDecoration.ITALIC, false));
         lore.addAll(messageManager.getComponentList("gui.warp_selection.settings_shortcut.lore").stream()
                 .map(c -> c.decoration(TextDecoration.ITALIC, false))
@@ -261,109 +217,6 @@ public class WarpSelectionGUI implements InventoryHolder {
         meta.lore(lore);
         item.setItemMeta(meta);
         return item;
-    }
-
-    public boolean handleClick(Player player, int slot) {
-        Warp sourceWarp = openSelections.get(player.getUniqueId());
-        if (sourceWarp == null)
-            return false;
-
-        player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
-
-        if (slot == SLOT_BEACON) {
-            UUID uuid = player.getUniqueId();
-            int mode = filterMode.getOrDefault(uuid, 0);
-            int maxMode = sourceWarp.isAdminWarp() ? 3 : 2;
-            filterMode.put(uuid, (mode + 1) % maxMode);
-            rebuildGUI(player);
-            return true;
-        }
-
-        if (slot == SLOT_PREV) {
-            UUID uuid = player.getUniqueId();
-            int page = currentPage.getOrDefault(uuid, 0);
-            if (page > 0) {
-                currentPage.put(uuid, page - 1);
-                rebuildGUI(player);
-            }
-            return true;
-        }
-
-        if (slot == SLOT_NEXT) {
-            UUID uuid = player.getUniqueId();
-            int page = currentPage.getOrDefault(uuid, 0);
-            int pageCount = getPageCount(player);
-            if (page < pageCount - 1) {
-                currentPage.put(uuid, page + 1);
-                rebuildGUI(player);
-            }
-            return true;
-        }
-
-        if (slot == SLOT_SETTINGS) {
-            if (sourceWarp.isOwner(player.getUniqueId()) && settingsGUI != null) {
-                settingsGUI.open(player, sourceWarp, true);
-            }
-            return true;
-        }
-
-        if (slot < 0 || slot >= ITEMS_PER_PAGE)
-            return true;
-
-        int page = currentPage.getOrDefault(player.getUniqueId(), 0);
-        List<Warp> destinations = getFilteredDestinations(player, sourceWarp);
-        int index = page * ITEMS_PER_PAGE + slot;
-        if (index >= destinations.size())
-            return true;
-
-        Warp destination = destinations.get(index);
-
-        if (!travelQueue.tryClaim(destination)) {
-            travelQueue.enqueue(player, sourceWarp, destination);
-            messageManager.send(player, "gui.warp_selection.warp_busy");
-            rebuildGUI(player);
-            return true;
-        }
-
-        Warp costWarp = sourceWarp.isAdminWarp() ? sourceWarp : destination;
-        if (!warpManager.canAfford(player, costWarp)) {
-            travelQueue.onComplete(destination);
-            String costType = costWarp.getCostType().name().toLowerCase();
-            int amount = (int) costWarp.getCost();
-            int missing = costWarp.getCostType() == CostType.XP
-                    ? warpManager.getMissingXp(player, costWarp)
-                    : 0;
-            messageManager.send(player, "cost.not_enough_" + costType,
-                    Map.of("amount", String.valueOf(amount),
-                            "missing", String.valueOf(missing)));
-            return true;
-        }
-
-        int cd = configManager.getCooldown();
-        if (cd > 0) {
-            long last = cooldowns.getOrDefault(player.getUniqueId(), 0L);
-            long elapsed = (System.currentTimeMillis() - last) / 1000;
-            if (elapsed < cd) {
-                travelQueue.onComplete(destination);
-                messageManager.sendTravel(player, "cooldown",
-                        Map.of("time", String.valueOf(cd - elapsed)));
-                return true;
-            }
-        }
-
-        player.closeInventory();
-        openSelections.remove(player.getUniqueId());
-
-        startTravel(player, sourceWarp, destination);
-        return true;
-    }
-
-    private int getPageCount(Player player) {
-        Warp sourceWarp = openSelections.get(player.getUniqueId());
-        if (sourceWarp == null)
-            return 0;
-        List<Warp> destinations = getFilteredDestinations(player, sourceWarp);
-        return (destinations.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
     }
 
     public void startTravel(Player player, Warp source, Warp destination) {
@@ -533,26 +386,142 @@ public class WarpSelectionGUI implements InventoryHolder {
         }
     }
 
-    public void close(Player player) {
-        UUID uuid = player.getUniqueId();
-        openSelections.remove(uuid);
-        currentPage.remove(uuid);
-        filterMode.remove(uuid);
-    }
+    private class GUI extends AbstractGUI {
+        private final UUID playerUUID;
+        private final Warp sourceWarp;
 
-    public boolean hasOpen(Player player) {
-        return openSelections.containsKey(player.getUniqueId());
-    }
+        private int currentPage;
+        private int mode;
 
-    @Override
-    public Inventory getInventory() {
-        return null;
-    }
+        public GUI(UUID playerUUID, Warp sourceWarp) {
+            super(INVENTORY_SIZE, messageManager.get("gui.warp_selection.title"));
+            this.playerUUID = playerUUID;
+            this.sourceWarp = sourceWarp;
+            this.currentPage = 0;
+            this.mode = 0;
 
-    public void cleanup(Player player) {
-        UUID uuid = player.getUniqueId();
-        openSelections.remove(uuid);
-        currentPage.remove(uuid);
-        filterMode.remove(uuid);
+            List<Warp> warps = getFilteredDestinations(playerUUID, sourceWarp, mode);
+            int totalPages = (warps.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+            fillWarps(warps, totalPages);
+
+            inventory.setItem(SLOT_BEACON, createBeaconItem(sourceWarp, mode));
+            if (sourceWarp.isOwner(playerUUID)) {
+                inventory.setItem(SLOT_SETTINGS, createSettingsShortcutItem(sourceWarp));
+            }
+        }
+
+        @Override
+        public void handleClick(@NotNull InventoryClickEvent event) {
+            int slot = event.getSlot();
+            Player player = (Player) event.getWhoClicked();
+            player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
+
+            switch (slot) {
+                case SLOT_BEACON -> {
+                    int maxMode = sourceWarp.isAdminWarp() ? 3 : 2;
+                    mode = (mode + 1) % maxMode;
+                    rebuildWarps();
+                }
+                case SLOT_PREV -> {
+                    if (currentPage <= 0)
+                        return;
+                    currentPage--;
+                    rebuildWarps();
+                }
+                case SLOT_NEXT -> {
+                    List<Warp> warps = getFilteredDestinations(playerUUID, sourceWarp, mode);
+                    int totalPages = (warps.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                    if (currentPage >= totalPages - 1)
+                        return;
+                    currentPage++;
+                    rebuildWarps();
+                }
+                case SLOT_SETTINGS -> {
+                    if (!sourceWarp.isOwner(playerUUID))
+                        return;
+                    settingsGUI.open(player, sourceWarp, true);
+                }
+                default -> {
+                    if (slot >= ITEMS_PER_PAGE)
+                        return;
+
+                    List<Warp> destinations = getFilteredDestinations(playerUUID, sourceWarp, mode);
+                    int index = currentPage * ITEMS_PER_PAGE + slot;
+                    if (index >= destinations.size()) {
+                        rebuildWarps();
+                        return;
+                    }
+
+                    Warp destination = destinations.get(index);
+                    if (!travelQueue.tryClaim(destination)) {
+                        travelQueue.enqueue(player, sourceWarp, destination);
+                        messageManager.send(player, "gui.warp_selection.warp_busy");
+                        rebuildWarps();
+                        return;
+                    }
+
+                    Warp costWarp = sourceWarp.isAdminWarp() ? sourceWarp : destination;
+                    if (!warpManager.canAfford(player, costWarp)) {
+                        travelQueue.onComplete(destination);
+                        String costType = costWarp.getCostType().name().toLowerCase();
+                        int amount = (int) costWarp.getCost();
+                        int missing = costWarp.getCostType() == CostType.XP
+                                ? warpManager.getMissingXp(player, costWarp)
+                                : 0;
+                        messageManager.send(player, "cost.not_enough_" + costType,
+                                Map.of("amount", String.valueOf(amount),
+                                        "missing", String.valueOf(missing)));
+                        return;
+                    }
+
+                    int cd = configManager.getCooldown();
+                    if (cd > 0) {
+                        long last = cooldowns.getOrDefault(player.getUniqueId(), 0L);
+                        long elapsed = (System.currentTimeMillis() - last) / 1000;
+                        if (elapsed < cd) {
+                            travelQueue.onComplete(destination);
+                            messageManager.sendTravel(player, "cooldown",
+                                    Map.of("time", String.valueOf(cd - elapsed)));
+                            return;
+                        }
+                    }
+
+                    player.closeInventory();
+                    startTravel(player, sourceWarp, destination);
+                }
+            }
+        }
+
+        private void rebuildWarps() {
+            List<Warp> warps = getFilteredDestinations(playerUUID, sourceWarp, mode);
+            int totalPages = (warps.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+            fillWarps(warps, totalPages);
+        }
+
+        private void fillWarps(@NotNull List<@NotNull Warp> warps,
+                               int totalPages) {
+            if (currentPage >= totalPages) {
+                currentPage = totalPages - 1;
+            }
+
+            int start = currentPage * ITEMS_PER_PAGE;
+            int end = Math.min(start + ITEMS_PER_PAGE, warps.size());
+            for (int slot = 0; slot < ITEMS_PER_PAGE; slot++) {
+                int index = start + slot;
+                if (index < end) {
+                    inventory.setItem(slot, createWarpItem(warps.get(index), sourceWarp));
+                } else {
+                    inventory.setItem(slot, null);
+                }
+            }
+
+            if (totalPages > 1) {
+                inventory.setItem(SLOT_PREV, createSimpleItem(Material.ARROW, "gui.warp_selection.page_previous"));
+                inventory.setItem(SLOT_NEXT, createSimpleItem(Material.ARROW, "gui.warp_selection.page_next"));
+            } else {
+                inventory.setItem(SLOT_PREV, null);
+                inventory.setItem(SLOT_NEXT, null);
+            }
+        }
     }
 }

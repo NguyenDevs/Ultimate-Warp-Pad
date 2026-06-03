@@ -2,25 +2,24 @@ package org.nguyendevs.ultimateWarpPad.gui;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
 import org.nguyendevs.ultimateWarpPad.model.WarpType;
+import org.nguyendevs.ultimateWarpPad.util.AbstractGUI;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SettingsGUI implements InventoryHolder {
+public class SettingsGUI {
 
     private static final int SLOT_ITEM1 = 9;
     private static final int SLOT_ITEM2 = 11;
@@ -28,27 +27,23 @@ public class SettingsGUI implements InventoryHolder {
     private static final int SLOT_ICON = 15;
     private static final int SLOT_DELETE = 17;
     private static final int SLOT_RETURN_CLOSE = 22;
+    private static final int INVENTORY_SIZE = 27;
 
     private static final int[] ADMIN_RANGES = {-1, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
     private static final int[] PLAYER_RANGES = {50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000};
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
-    private final Map<UUID, Warp> openSettings;
-    private final Map<UUID, Boolean> fromSelectionMap;
-    private final Map<UUID, Boolean> pendingFromSelection;
-    private final Map<UUID, Warp> pendingNameChanges;
-    private final Map<UUID, Warp> pendingCostAmounts;
-    private final Map<UUID, Warp> pendingDeletions;
+    private final Map<UUID, PendingData> pendingNameChanges;
+    private final Map<UUID, PendingData> pendingCostAmounts;
+    private final Map<UUID, PendingData> pendingDeletions;
+
     private IconSelectionGUI iconSelectionGUI;
     private WarpSelectionGUI warpSelectionGUI;
 
     public SettingsGUI(WarpManager warpManager, MessageManager messageManager) {
         this.warpManager = warpManager;
         this.messageManager = messageManager;
-        this.openSettings = new HashMap<>();
-        this.fromSelectionMap = new HashMap<>();
-        this.pendingFromSelection = new HashMap<>();
         this.pendingNameChanges = new ConcurrentHashMap<>();
         this.pendingCostAmounts = new ConcurrentHashMap<>();
         this.pendingDeletions = new ConcurrentHashMap<>();
@@ -67,89 +62,11 @@ public class SettingsGUI implements InventoryHolder {
     }
 
     public void open(Player player, Warp warp, boolean fromSelection) {
-        Inventory inv = Bukkit.createInventory(this, 27,
-                messageManager.get("gui.settings.title"));
-
-        if (warp.getType() == WarpType.PLAYER) {
-            inv.setItem(SLOT_ITEM1, createVisibilityItem(warp));
-            inv.setItem(SLOT_ITEM2, createNameItem(warp));
-            inv.setItem(SLOT_ITEM4, createRangeItem(warp, player));
-        } else {
-            inv.setItem(SLOT_ITEM1, createNameItem(warp));
-            inv.setItem(SLOT_ITEM2, createCostItem(warp));
-            inv.setItem(SLOT_ITEM4, createRangeItem(warp, player));
-        }
-
-        inv.setItem(SLOT_ICON, createIconItem(warp));
-        inv.setItem(SLOT_DELETE, createDeleteItem(warp));
-
-        if (fromSelection) {
-            inv.setItem(SLOT_RETURN_CLOSE, createReturnItem());
-        } else {
-            inv.setItem(SLOT_RETURN_CLOSE, createCloseItem());
-        }
-
-        player.openInventory(inv);
-        player.playSound(player.getLocation(), "minecraft:block.amethyst_block.resonate", SoundCategory.AMBIENT, 1.0f, 1.0f);
-        openSettings.put(player.getUniqueId(), warp);
-        fromSelectionMap.put(player.getUniqueId(), fromSelection);
+        new GUI(player, warp, fromSelection).open(player);
     }
 
-    public boolean handleClick(Player player, int slot, ClickType clickType, ItemStack cursor) {
-        Warp warp = openSettings.get(player.getUniqueId());
-        if (warp == null) return false;
-
-        if (slot == SLOT_RETURN_CLOSE) {
-            boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
-            openSettings.remove(player.getUniqueId());
-            fromSelectionMap.remove(player.getUniqueId());
-            player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
-            if (fromSel && warpSelectionGUI != null) {
-                warpSelectionGUI.open(player, warp);
-            } else {
-                player.closeInventory();
-            }
-            return true;
-        }
-
-        player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
-
-        if (slot == SLOT_DELETE) {
-            handleDeletePrompt(player, warp);
-            return true;
-        }
-
-        if (slot == SLOT_ICON) {
-            handleIconSelection(player, warp);
-            return true;
-        }
-
-        if (warp.getType() == WarpType.PLAYER) {
-            switch (slot) {
-                case SLOT_ITEM1 -> handleVisibilityToggle(player, warp);
-                case SLOT_ITEM2 -> handleNameChange(player, warp);
-                case SLOT_ITEM4 -> handleRangeCycle(player, warp);
-                default -> { return false; }
-            }
-        } else {
-            switch (slot) {
-                case SLOT_ITEM1 -> handleNameChange(player, warp);
-                case SLOT_ITEM2 -> {
-                    if (clickType == ClickType.RIGHT || clickType == ClickType.SHIFT_RIGHT) {
-                        handleCostAmountPrompt(player, warp);
-                    } else {
-                        handleCostTypeCycle(player, warp);
-                    }
-                }
-                case SLOT_ITEM4 -> handleRangeCycle(player, warp);
-                default -> { return false; }
-            }
-        }
-        return true;
-    }
-
-    public boolean handleDrag(Player player, int slot, ItemStack dropped) {
-        return false;
+    public void open(Player player, PendingData data) {
+        new GUI(player, data.warp, data.fromSelection).open(player);
     }
 
     private ItemStack createVisibilityItem(Warp warp) {
@@ -289,25 +206,23 @@ public class SettingsGUI implements InventoryHolder {
         return item;
     }
 
-    private void handleVisibilityToggle(Player player, Warp warp) {
+    private void handleVisibilityToggle(Player player, GUI gui) {
+        Warp warp = gui.warp;
         warp.setPublic(!warp.isPublic());
         warpManager.saveWarp(warp);
         messageManager.send(player, "warp.visibility_changed",
                 Map.of("visibility", warp.isPublic() ? "Public" : "Private"));
-        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
+        gui.getInventory().setItem(SLOT_ITEM1, createVisibilityItem(warp));
     }
 
-    private void handleNameChange(Player player, Warp warp) {
-        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
+    private void handleNameChange(Player player, GUI gui) {
         player.closeInventory();
-        openSettings.remove(player.getUniqueId());
-        fromSelectionMap.remove(player.getUniqueId());
-        pendingNameChanges.put(player.getUniqueId(), warp);
-        pendingFromSelection.put(player.getUniqueId(), fromSel);
+        pendingNameChanges.put(player.getUniqueId(), new PendingData(gui.warp, gui.fromSelection));
         messageManager.send(player, "prompt.enter_name");
     }
 
-    private void handleCostTypeCycle(Player player, Warp warp) {
+    private void handleCostTypeCycle(GUI gui) {
+        Warp warp = gui.warp;
         CostType[] types = CostType.values();
         int next = (warp.getCostType().ordinal() + 1) % types.length;
         warp.setCostType(types[next]);
@@ -315,21 +230,18 @@ public class SettingsGUI implements InventoryHolder {
             warp.setCost(-1);
         }
         warpManager.saveWarp(warp);
-        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
+        gui.getInventory().setItem(SLOT_ITEM2, createCostItem(warp));
     }
 
-    private void handleCostAmountPrompt(Player player, Warp warp) {
-        if (warp.getCostType() == CostType.FREE) return;
-        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
+    private void handleCostAmountPrompt(Player player, GUI gui) {
+        if (gui.warp.getCostType() == CostType.FREE) return;
         player.closeInventory();
-        openSettings.remove(player.getUniqueId());
-        fromSelectionMap.remove(player.getUniqueId());
-        pendingCostAmounts.put(player.getUniqueId(), warp);
-        pendingFromSelection.put(player.getUniqueId(), fromSel);
+        pendingCostAmounts.put(player.getUniqueId(), new PendingData(gui.warp, gui.fromSelection));
         messageManager.send(player, "prompt.enter_cost_amount");
     }
 
-    private void handleRangeCycle(Player player, Warp warp) {
+    private void handleRangeCycle(Player player, GUI gui) {
+        Warp warp = gui.warp;
         int[] ranges = getAvailableRanges(warp, player);
         int current = warp.getRange();
         int nextIndex = 0;
@@ -346,22 +258,16 @@ public class SettingsGUI implements InventoryHolder {
                 ? messageManager.getRaw("gui.settings.range.unlimited")
                 : newRange + " blocks";
         messageManager.send(player, "warp.range_changed", Map.of("range", rangeText));
-        open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
+        gui.getInventory().setItem(SLOT_ITEM4, createRangeItem(warp, player));
     }
 
-    private void handleIconSelection(Player player, Warp warp) {
-        if (iconSelectionGUI != null) {
-            iconSelectionGUI.open(player, warp, fromSelectionMap.getOrDefault(player.getUniqueId(), false));
-        }
+    private void handleIconSelection(Player player, GUI gui) {
+        iconSelectionGUI.open(player, gui.warp, gui.fromSelection);
     }
 
-    private void handleDeletePrompt(Player player, Warp warp) {
-        boolean fromSel = fromSelectionMap.getOrDefault(player.getUniqueId(), false);
+    private void handleDeletePrompt(Player player, GUI gui) {
         player.closeInventory();
-        openSettings.remove(player.getUniqueId());
-        fromSelectionMap.remove(player.getUniqueId());
-        pendingDeletions.put(player.getUniqueId(), warp);
-        pendingFromSelection.put(player.getUniqueId(), fromSel);
+        pendingDeletions.put(player.getUniqueId(), new PendingData(gui.warp, gui.fromSelection));
         messageManager.send(player, "prompt.delete_confirm");
     }
 
@@ -387,11 +293,9 @@ public class SettingsGUI implements InventoryHolder {
     }
 
     public void close(Player player) {
-        openSettings.remove(player.getUniqueId());
-        fromSelectionMap.remove(player.getUniqueId());
     }
 
-    public Warp removePendingNameChange(UUID playerUUID) {
+    public PendingData removePendingNameChange(UUID playerUUID) {
         return pendingNameChanges.remove(playerUUID);
     }
 
@@ -399,7 +303,7 @@ public class SettingsGUI implements InventoryHolder {
         return pendingNameChanges.containsKey(playerUUID);
     }
 
-    public Warp removePendingCostAmount(UUID playerUUID) {
+    public PendingData removePendingCostAmount(UUID playerUUID) {
         return pendingCostAmounts.remove(playerUUID);
     }
 
@@ -407,11 +311,11 @@ public class SettingsGUI implements InventoryHolder {
         return pendingCostAmounts.containsKey(playerUUID);
     }
 
-    public Warp getPendingDeletion(UUID playerUUID) {
+    public PendingData getPendingDeletion(UUID playerUUID) {
         return pendingDeletions.get(playerUUID);
     }
 
-    public Warp removePendingDeletion(UUID playerUUID) {
+    public PendingData removePendingDeletion(UUID playerUUID) {
         return pendingDeletions.remove(playerUUID);
     }
 
@@ -419,25 +323,82 @@ public class SettingsGUI implements InventoryHolder {
         return pendingDeletions.containsKey(playerUUID);
     }
 
-    public boolean getPendingFromSelection(UUID playerUUID) {
-        return pendingFromSelection.getOrDefault(playerUUID, false);
-    }
-
-    public boolean removePendingFromSelection(UUID playerUUID) {
-        return pendingFromSelection.remove(playerUUID);
-    }
-
-    @Override
-    public Inventory getInventory() {
-        return null;
-    }
-
     public void cleanup(Player player) {
-        openSettings.remove(player.getUniqueId());
-        fromSelectionMap.remove(player.getUniqueId());
-        pendingNameChanges.remove(player.getUniqueId());
-        pendingCostAmounts.remove(player.getUniqueId());
-        pendingDeletions.remove(player.getUniqueId());
-        pendingFromSelection.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        pendingNameChanges.remove(uuid);
+        pendingCostAmounts.remove(uuid);
+        pendingDeletions.remove(uuid);
+    }
+
+    public record PendingData(Warp warp, boolean fromSelection) {
+    }
+
+    private class GUI extends AbstractGUI {
+        private final Warp warp;
+        private final boolean fromSelection;
+
+        public GUI(Player player, Warp warp, boolean fromSelection) {
+            super(INVENTORY_SIZE, messageManager.get("gui.settings.title"));
+            this.warp = warp;
+            this.fromSelection = fromSelection;
+
+            if (warp.getType() == WarpType.PLAYER) {
+                inventory.setItem(SLOT_ITEM1, createVisibilityItem(warp));
+                inventory.setItem(SLOT_ITEM2, createNameItem(warp));
+                inventory.setItem(SLOT_ITEM4, createRangeItem(warp, player));
+            } else {
+                inventory.setItem(SLOT_ITEM1, createNameItem(warp));
+                inventory.setItem(SLOT_ITEM2, createCostItem(warp));
+                inventory.setItem(SLOT_ITEM4, createRangeItem(warp, player));
+            }
+
+            inventory.setItem(SLOT_ICON, createIconItem(warp));
+            inventory.setItem(SLOT_DELETE, createDeleteItem(warp));
+
+            if (fromSelection) {
+                inventory.setItem(SLOT_RETURN_CLOSE, createReturnItem());
+            } else {
+                inventory.setItem(SLOT_RETURN_CLOSE, createCloseItem());
+            }
+        }
+
+        @Override
+        public void handleClick(@NotNull InventoryClickEvent event) {
+            Player player = (Player) event.getWhoClicked();
+            player.playSound(player.getLocation(), "minecraft:ui.button.click", SoundCategory.AMBIENT, 1.0f, 1.0f);
+
+            int slot = event.getSlot();
+            switch (slot) {
+                case SLOT_RETURN_CLOSE -> {
+                    if (fromSelection) {
+                        warpSelectionGUI.open(player, warp);
+                        return;
+                    }
+                    player.closeInventory();
+                }
+                case SLOT_DELETE -> handleDeletePrompt(player, this);
+                case SLOT_ICON -> handleIconSelection(player, this);
+                case SLOT_ITEM1 -> {
+                    if (warp.getType() == WarpType.PLAYER) {
+                        handleVisibilityToggle(player, this);
+                        return;
+                    }
+                    handleNameChange(player, this);
+                }
+                case SLOT_ITEM2 -> {
+                    if (warp.getType() == WarpType.PLAYER) {
+                        handleNameChange(player, this);
+                        return;
+                    }
+
+                    if (event.isRightClick()) {
+                        handleCostAmountPrompt(player, this);
+                    } else {
+                        handleCostTypeCycle(this);
+                    }
+                }
+                case SLOT_ITEM4 -> handleRangeCycle(player, this);
+            }
+        }
     }
 }
