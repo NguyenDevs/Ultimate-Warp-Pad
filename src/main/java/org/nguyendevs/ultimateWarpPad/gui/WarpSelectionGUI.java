@@ -500,7 +500,7 @@ public class WarpSelectionGUI {
 
         private void fillWarps(@NotNull List<@NotNull Warp> warps,
                                int totalPages) {
-            if (currentPage >= totalPages) {
+            if (totalPages > 0 && currentPage >= totalPages) {
                 currentPage = totalPages - 1;
             }
 
