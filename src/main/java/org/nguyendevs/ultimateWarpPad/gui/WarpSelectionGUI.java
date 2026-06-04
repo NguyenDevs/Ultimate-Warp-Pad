@@ -342,16 +342,16 @@ public class WarpSelectionGUI {
             double relX = member.getX() - centerX;
             double relZ = member.getZ() - centerZ;
 
+            if (configManager.isGroupCollision()) {
+                member.setCollidable(false);
+            }
+
             if (configManager.isCenter()) {
                 Location snapLoc = member.getLocation().clone();
                 snapLoc.setX(centerX);
                 snapLoc.setY(source.getY() + (source.isAdminWarp() ? 2 : 1));
                 snapLoc.setZ(centerZ);
                 member.teleport(snapLoc);
-            }
-
-            if (configManager.isGroupCollision()) {
-                member.setCollidable(false);
             }
 
             final int startOffset = delay;
