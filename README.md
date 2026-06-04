@@ -17,7 +17,7 @@ Inspired by **Steven Universe**, this plugin recreates the iconic warp pad exper
 | Feature | Description |
 |---------|-------------|
 | **Real Block Warp Pads** | Warp pads are built with real in-game blocks across 6 schematic variants. They're not virtual items or menu buttons — you can see them, touch them, and interact with them. |
-| **Beautiful Interactive GUI** | A modern Warp Selection GUI with pagination, filter modes (Admin Warps / Your Warps / Public Warps / Trusted Warps), and full destination info — world, coordinates, cost. |
+| **Interactive GUI** | A modern Warp Selection GUI with pagination, filter modes (Admin Warps / Your Warps / Public Warps / Trusted Warps), and full destination info — world, coordinates, cost. |
 | **Two Warp Types** | **WPA (Admin Warp):** 7×7 structure for public destinations. **WPP (Player Warp):** 5×5 structure for players, with trust system and Private/Public visibility. |
 |️ **Trust & Privacy System** | Grant trusted players access to your private warp. Each warp can be **Public** (visible to all), **Private** (owner + trusted only), or part of a **Trusted Network**. |
 | **Cross-Navigation (Configurable)** | Let trusted players travel across warps in the same network. Disable via `connect-private-trusted: false` to restrict to Trusted↔Trusted and Private↔Private only. |
