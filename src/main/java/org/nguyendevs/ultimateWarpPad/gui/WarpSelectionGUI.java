@@ -100,9 +100,11 @@ public class WarpSelectionGUI {
                         ? "gui.warp_selection.beacon.admin_name"
                         : "gui.warp_selection.beacon.player_name")
                 .decoration(TextDecoration.ITALIC, false));
-        meta.lore(messageManager.getComponentList(isAdmin
-                                ? "gui.warp_selection.beacon.admin_lore"
-                                : "gui.warp_selection.beacon.player_lore",
+        boolean canSwitch = isAdmin || configManager.isConnectPrivateTrusted();
+        String lorePath = isAdmin ? "gui.warp_selection.beacon.admin_lore"
+                : (canSwitch ? "gui.warp_selection.beacon.player_lore"
+                        : "gui.warp_selection.beacon.player_locked_lore");
+        meta.lore(messageManager.getComponentList(lorePath,
                         Map.of("mode", modeName)).stream()
                 .map(c -> c.decoration(TextDecoration.ITALIC, false))
                 .collect(Collectors.toList()));
@@ -144,6 +146,22 @@ public class WarpSelectionGUI {
         }
 
         boolean connect = configManager.isConnectPrivateTrusted();
+
+        if (!connect && !sourceWarp.isAdminWarp()) {
+            if (sourceWarp.isOwner(playerUUID)) {
+                return warpManager.getAvailableDestinations(sourceWarp, playerUUID);
+            }
+            if (sourceWarp.canPlayerUse(playerUUID)) {
+                UUID owner = sourceWarp.getOwner();
+                return warpManager.getAllWarps().stream()
+                        .filter(w -> w.getOwner() != null && w.getOwner().equals(owner))
+                        .filter(w -> w.canPlayerUse(playerUUID))
+                        .filter(w -> !w.getCompositeId().equals(sourceWarp.getCompositeId()))
+                        .filter(w -> warpManager.isInRange(sourceWarp, w))
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        }
 
         if (mode == 0) {
             if (sourceWarp.isOwner(playerUUID)) {
@@ -411,7 +429,9 @@ public class WarpSelectionGUI {
             this.playerUUID = playerUUID;
             this.sourceWarp = sourceWarp;
             this.currentPage = 0;
-            this.mode = 0;
+
+            boolean canSwitch = sourceWarp.isAdminWarp() || configManager.isConnectPrivateTrusted();
+            this.mode = (!canSwitch && !sourceWarp.isOwner(playerUUID)) ? 1 : 0;
 
             List<Warp> warps = getFilteredDestinations(playerUUID, sourceWarp, mode);
             int totalPages = (warps.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
@@ -431,6 +451,13 @@ public class WarpSelectionGUI {
 
             switch (slot) {
                 case SLOT_BEACON -> {
+                    boolean canSwitch = sourceWarp.isAdminWarp() || configManager.isConnectPrivateTrusted();
+                    if (!canSwitch) {
+                        messageManager.send(player, "gui.warp_selection.cross_navigation_disabled");
+                        player.playSound(player.getLocation(), "minecraft:block.note_block.bass",
+                                SoundCategory.AMBIENT, 1.0f, 0.5f);
+                        return;
+                    }
                     int maxMode = sourceWarp.isAdminWarp() ? 3 : 2;
                     mode = (mode + 1) % maxMode;
                     rebuildWarps();
