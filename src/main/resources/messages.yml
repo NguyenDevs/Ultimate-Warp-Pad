@@ -79,6 +79,7 @@ gui:
         - "&c⚠ Warp is being used"
     no_destinations: "&cNo destinations available within range."
     warp_busy: "&cThis warp is currently being used. You have been queued."
+    cross_navigation_disabled: "&cCross-navigation between trusted warps and your warps is currently disabled."
     page_previous: "&7← Previous"
     page_next: "&7Next →"
     beacon:
@@ -95,10 +96,23 @@ gui:
       player_lore:
         - "&7Current: &f%mode%"
         - " "
-        - "&f▸ &8Your Warps"
-        - "&f▸ &8Trusted Warps"
+        - "&f▸ &7Cross-navigation: &aEnabled"
+        - "&f▸ &7You can teleport between:"
+        - " "
+        - "&8▸ &fPrivate&7-&fPrivate"
+        - "&8▸ &eTrusted&7-&eTrusted"
+        - "&8▸ &fPrivate&7-&eTrusted"
+        - "&8▸ &eTrusted&7-&fPrivate"
         - " "
         - "&a▸ Click to switch"
+      player_locked_lore:
+        - "&7Current: &f%mode%"
+        - " "
+        - "&f▸ &7Cross-navigation: &cDisabled!"
+        - "&f▸ &7Can only teleport between:"
+        - " "
+        - "&8▸ &fPrivate&7-&fPrivate"
+        - "&8▸ &eTrusted&7-&eTrusted"
     filter_modes_admin:
       - "&dAdmin Warps"
       - "&aYour Warps"
