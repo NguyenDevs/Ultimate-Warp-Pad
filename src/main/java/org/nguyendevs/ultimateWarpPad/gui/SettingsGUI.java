@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
 import org.nguyendevs.ultimateWarpPad.manager.WarpManager;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
@@ -34,6 +35,7 @@ public class SettingsGUI {
 
     private final WarpManager warpManager;
     private final MessageManager messageManager;
+    private final ConfigManager configManager;
     private final Map<UUID, PendingData> pendingNameChanges;
     private final Map<UUID, PendingData> pendingCostAmounts;
     private final Map<UUID, PendingData> pendingDeletions;
@@ -41,9 +43,10 @@ public class SettingsGUI {
     private IconSelectionGUI iconSelectionGUI;
     private WarpSelectionGUI warpSelectionGUI;
 
-    public SettingsGUI(WarpManager warpManager, MessageManager messageManager) {
+    public SettingsGUI(WarpManager warpManager, MessageManager messageManager, ConfigManager configManager) {
         this.warpManager = warpManager;
         this.messageManager = messageManager;
+        this.configManager = configManager;
         this.pendingNameChanges = new ConcurrentHashMap<>();
         this.pendingCostAmounts = new ConcurrentHashMap<>();
         this.pendingDeletions = new ConcurrentHashMap<>();
@@ -208,11 +211,16 @@ public class SettingsGUI {
 
     private void handleVisibilityToggle(Player player, GUI gui) {
         Warp warp = gui.warp;
-        warp.setPublic(!warp.isPublic());
+        boolean nowPublic = !warp.isPublic();
+        warp.setPublic(nowPublic);
+        warp.setIcon(nowPublic
+                ? configManager.getDefaultPublicWarpIcon()
+                : configManager.getDefaultPlayerWarpIcon());
         warpManager.saveWarp(warp);
         messageManager.send(player, "warp.visibility_changed",
-                Map.of("visibility", warp.isPublic() ? "Public" : "Private"));
+                Map.of("visibility", nowPublic ? "Public" : "Private"));
         gui.getInventory().setItem(SLOT_ITEM1, createVisibilityItem(warp));
+        gui.getInventory().setItem(SLOT_ICON, createIconItem(warp));
     }
 
     private void handleNameChange(Player player, GUI gui) {

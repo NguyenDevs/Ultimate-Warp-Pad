@@ -63,7 +63,7 @@ public final class UltimateWarpPad extends JavaPlugin {
                     "&3[&bUltimateWarpPad&3] &aAll warps loaded."));
         });
 
-        settingsGUI = new SettingsGUI(warpManager, messageManager);
+        settingsGUI = new SettingsGUI(warpManager, messageManager, configManager);
         iconSelectionGUI = new IconSelectionGUI(warpManager, messageManager, configManager, settingsGUI);
         settingsGUI.setIconSelectionGUI(iconSelectionGUI);
 
