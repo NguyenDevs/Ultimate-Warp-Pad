@@ -496,6 +496,7 @@ public class WarpSelectionGUI {
             List<Warp> warps = getFilteredDestinations(playerUUID, sourceWarp, mode);
             int totalPages = (warps.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
             fillWarps(warps, totalPages);
+            inventory.setItem(SLOT_BEACON, createBeaconItem(sourceWarp, mode));
         }
 
         private void fillWarps(@NotNull List<@NotNull Warp> warps,
