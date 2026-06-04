@@ -159,6 +159,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
         warp.setWarpName(warpName);
         warp.setLocation(player.getLocation());
         warp.setType(WarpType.ADMIN);
+        warp.setIcon(configManager.getDefaultAdminWarpIcon());
         warp.setCostType(CostType.FREE);
         warp.setCost(-1);
         warp.setRange(-1);

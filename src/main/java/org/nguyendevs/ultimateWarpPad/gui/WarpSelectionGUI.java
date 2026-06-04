@@ -90,7 +90,7 @@ public class WarpSelectionGUI {
                 ? "gui.warp_selection.filter_modes_admin"
                 : "gui.warp_selection.filter_modes_player");
 
-        Material mat = isAdmin ? getModeIcon(mode) : Material.BEACON;
+        Material mat = getModeIcon(isAdmin, mode);
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
 
@@ -111,11 +111,17 @@ public class WarpSelectionGUI {
     }
 
     @NotNull
-    private Material getModeIcon(int mode) {
+    private Material getModeIcon(boolean isAdmin, int mode) {
+        if (isAdmin) {
+            return switch (mode) {
+                case 0 -> configManager.getDefaultAdminWarpIcon();
+                case 1 -> configManager.getDefaultPlayerWarpIcon();
+                default -> configManager.getDefaultPublicWarpIcon();
+            };
+        }
         return switch (mode) {
-            case 0 -> Material.BEACON;
-            case 1 -> Material.NETHER_STAR;
-            default -> Material.TOTEM_OF_UNDYING;
+            case 0 -> configManager.getDefaultPlayerWarpIcon();
+            default -> configManager.getDefaultPublicWarpIcon();
         };
     }
 

@@ -1,6 +1,7 @@
 package org.nguyendevs.ultimateWarpPad.manager;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -32,6 +33,9 @@ public class ConfigManager {
     private int groupDelayInTick;
     private boolean center;
     private List<String> waypointIcons;
+    private Material defaultPlayerWarpIcon;
+    private Material defaultAdminWarpIcon;
+    private Material defaultPublicWarpIcon;
     private List<String> disabledWorlds;
     private boolean particleEnabled;
     private Particle particleType;
@@ -145,6 +149,18 @@ public class ConfigManager {
         return waypointIcons;
     }
 
+    public Material getDefaultPlayerWarpIcon() {
+        return defaultPlayerWarpIcon;
+    }
+
+    public Material getDefaultAdminWarpIcon() {
+        return defaultAdminWarpIcon;
+    }
+
+    public Material getDefaultPublicWarpIcon() {
+        return defaultPublicWarpIcon;
+    }
+
     public boolean isDisabledWorld(String worldName) {
         return disabledWorlds.contains(worldName);
     }
@@ -243,11 +259,25 @@ public class ConfigManager {
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to merge icons.yml defaults: " + e.getMessage());
         }
+        defaultPlayerWarpIcon = readMaterial(iconsConfig, "default.player-warp", Material.NETHER_STAR);
+        defaultAdminWarpIcon = readMaterial(iconsConfig, "default.admin-warp", Material.BEACON);
+        defaultPublicWarpIcon = readMaterial(iconsConfig, "default.public-warp", Material.TOTEM_OF_UNDYING);
+
         List<String> icons = iconsConfig.getStringList("icons");
         if (icons.isEmpty()) {
             icons = List.of("NETHER_STAR", "DIAMOND", "EMERALD", "GOLD_INGOT");
         }
         return icons;
+    }
+
+    private Material readMaterial(YamlConfiguration config, String path, Material def) {
+        String name = config.getString(path);
+        if (name == null) return def;
+        try {
+            return Material.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return def;
+        }
     }
 
     private void autoUpdateKeys() {

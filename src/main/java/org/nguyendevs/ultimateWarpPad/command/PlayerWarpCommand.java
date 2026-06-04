@@ -123,6 +123,7 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
         warp.setWarpName(warpName);
         warp.setLocation(player.getLocation());
         warp.setType(WarpType.PLAYER);
+        warp.setIcon(configManager.getDefaultPlayerWarpIcon());
         warp.setCostType(CostType.XP);
         warp.setCost(-1);
         warp.setRange(1000);

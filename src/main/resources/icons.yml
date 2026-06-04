@@ -1,3 +1,8 @@
+default:
+  admin-warp: BEACON
+  player-warp: NETHER_STAR
+  public-warp: TOTEM_OF_UNDYING
+
 icons:
   - NETHER_STAR
   - BEACON
