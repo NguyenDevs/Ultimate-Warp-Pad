@@ -228,6 +228,8 @@ error:
   disabled_world: "&cWarp pads are disabled in this world."
   blocked_above: "&cThe sky above the warp pad is blocked! Clear the area above it first."
   dest_blocked: "&cThe destination warp's sky is blocked! Cannot teleport."
+  use_denied: "&cYou cannot use warp pads in this region."
+  place_denied: "&cYou cannot place warp pads in this region."
 
 craft:
   item_required: "&cYou need a &aWarp Creator &citem to create a warp."

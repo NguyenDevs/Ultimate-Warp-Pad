@@ -8,6 +8,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
+import org.nguyendevs.ultimateWarpPad.flag.UWPFlags;
 import org.nguyendevs.ultimateWarpPad.manager.CraftManager;
 import org.nguyendevs.ultimateWarpPad.manager.ConfigManager;
 import org.nguyendevs.ultimateWarpPad.manager.MessageManager;
@@ -127,6 +128,12 @@ public class PlayerWarpCommand implements CommandExecutor, TabCompleter {
         warp.setCostType(CostType.XP);
         warp.setCost(-1);
         warp.setRange(1000);
+
+        if (!UWPFlags.checkFlag(player.getLocation(), UWPFlags.UWP_PLACE)) {
+            messageManager.send(player, "error.place_denied");
+            playErrorSound(player);
+            return;
+        }
 
         if (!warpManager.isSkyClear(player.getLocation())) {
             messageManager.send(player, "error.blocked_above");

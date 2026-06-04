@@ -141,9 +141,9 @@ public class WarpManager {
             int lx = location.getBlockX();
             int ly = location.getBlockY();
             int lz = location.getBlockZ();
-            int half = warp.isAdminWarp() ? 3 : 2;
-            int halfY = warp.isAdminWarp() ? 2 : 1;
-            if (Math.abs(lx - wx) <= half && Math.abs(ly - wy) <= halfY && Math.abs(lz - wz) <= half) {
+            int half = 1;
+            int yOffset = warp.isAdminWarp() ? 2 : 1;
+            if (Math.abs(lx - wx) <= half && ly == wy + yOffset && Math.abs(lz - wz) <= half) {
                 return warp;
             }
         }

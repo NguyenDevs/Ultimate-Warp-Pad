@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.nguyendevs.ultimateWarpPad.UltimateWarpPad;
+import org.nguyendevs.ultimateWarpPad.flag.UWPFlags;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI.PendingData;
 import org.nguyendevs.ultimateWarpPad.gui.WarpSelectionGUI;
@@ -119,6 +120,13 @@ public class WarpListener implements Listener {
             return;
         }
 
+        if (!UWPFlags.checkFlag(loc, UWPFlags.UWP_PLACE)) {
+            event.setCancelled(true);
+            messageManager.send(player, "error.place_denied");
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+            return;
+        }
+
         String warpId = generateWarpId(uuid);
         String warpName = "Warp " + WarpManager.toRoman(warpManager.getPlayerWarpCount(uuid) + 1);
 
@@ -193,6 +201,11 @@ public class WarpListener implements Listener {
         if (warp == null) return;
         if (configManager.isDisabledWorld(player.getWorld().getName())) {
             messageManager.send(player, "error.disabled_world");
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+            return;
+        }
+        if (!UWPFlags.checkFlag(player.getLocation(), UWPFlags.UWP_USE)) {
+            messageManager.send(player, "error.use_denied");
             player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
             return;
         }

@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nguyendevs.ultimateWarpPad.command.AdminWarpCommand;
 import org.nguyendevs.ultimateWarpPad.command.PlayerWarpCommand;
+import org.nguyendevs.ultimateWarpPad.flag.UWPFlags;
 import org.nguyendevs.ultimateWarpPad.database.DatabaseManager;
 import org.nguyendevs.ultimateWarpPad.gui.IconSelectionGUI;
 import org.nguyendevs.ultimateWarpPad.gui.SettingsGUI;
@@ -34,6 +35,11 @@ public final class UltimateWarpPad extends JavaPlugin {
     private WarpListener warpListener;
     private WarpParticleManager warpParticleManager;
     private TravelQueue travelQueue;
+
+    @Override
+    public void onLoad() {
+        UWPFlags.register();
+    }
 
     @Override
     public void onEnable() {
