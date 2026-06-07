@@ -46,7 +46,7 @@ public class AdminWarpSchematicData {
             "minecraft:smooth_quartz_stairs[facing=west,half=top,shape=outer_right,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]",
-            "minecraft:diamond_block",
+            "minecraft:chiseled_quartz_block",
             "minecraft:smooth_quartz_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]",
             "minecraft:diorite_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]",
