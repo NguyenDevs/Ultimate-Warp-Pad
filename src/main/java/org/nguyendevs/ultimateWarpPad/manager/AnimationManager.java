@@ -1,13 +1,12 @@
 package org.nguyendevs.ultimateWarpPad.manager;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
 import org.nguyendevs.ultimateWarpPad.schematic.AdminWarpSchematicData;
-import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
+import org.nguyendevs.ultimateWarpPad.schematic.PlayerWarpSchematicData;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +73,7 @@ public class AnimationManager {
                     if (isAdmin) {
                         AdminWarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
                     } else {
-                        WarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
+                        PlayerWarpSchematicData.paste(world, ox, oy, oz, IDLE_SCHEMATIC - 1);
                     }
                     activeAnimations.remove(warp.getCompositeId());
                     activeCount--;
@@ -91,7 +90,7 @@ public class AnimationManager {
                     if (isAdmin) {
                         AdminWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
                     } else {
-                        WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                        PlayerWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
                     }
                 }
 
@@ -150,7 +149,7 @@ public class AnimationManager {
                     if (isAdmin) {
                         AdminWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
                     } else {
-                        WarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
+                        PlayerWarpSchematicData.paste(world, ox, oy, oz, schematicIndex);
                     }
                 }
 
