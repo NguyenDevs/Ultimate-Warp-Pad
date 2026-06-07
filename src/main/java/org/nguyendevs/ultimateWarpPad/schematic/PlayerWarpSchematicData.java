@@ -8,7 +8,7 @@ import org.bukkit.block.data.BlockData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarpSchematicData {
+public class PlayerWarpSchematicData {
 
     public static class SchematicData {
         public final BlockData[] palette;
@@ -44,7 +44,7 @@ public class WarpSchematicData {
             "minecraft:smooth_quartz_stairs[facing=east,half=top,shape=outer_left,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=north,half=top,shape=straight,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=west,half=top,shape=outer_right,waterlogged=false]",
-            "minecraft:diamond_block",
+            "minecraft:chiseled_quartz_block",
             "minecraft:smooth_quartz_stairs[facing=east,half=bottom,shape=outer_right,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]",
             "minecraft:smooth_quartz_stairs[facing=west,half=bottom,shape=outer_left,waterlogged=false]",
