@@ -1,6 +1,12 @@
 package org.nguyendevs.ultimateWarpPad.command;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,9 +63,11 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             case "delete" -> handleDelete(sender, args);
             case "setting" -> handleSetting(sender, args);
             case "give" -> handleGive(sender, args);
+            case "info" -> handleInfo(sender);
+            case "fixall" -> handleFixAll(sender);
             default -> {
                 messageManager.send(sender, "error.invalid_syntax",
-                        Map.of("usage", "/wpa <reload|create|delete|setting|give>"));
+                        Map.of("usage", "/wpa <reload|create|delete|setting|give|info|fixall>"));
                 playErrorSound(sender);
             }
         }
@@ -237,6 +245,71 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
         settingsGUI.open(player, warp);
     }
 
+    private void handleInfo(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            messageManager.send(sender, "error.player_only");
+            return;
+        }
+
+        Warp warp = warpManager.getWarpAtLocation(player.getLocation());
+        if (warp == null) {
+            messageManager.send(sender, "warp.not_found_standing");
+            playErrorSound(sender);
+            return;
+        }
+
+        String typeStr = warp.isAdminWarp() ? "WPA" : "WPP";
+        String coord = warp.getLocation().getBlockX() + ", " + warp.getLocation().getBlockY() + ", " + warp.getLocation().getBlockZ() + " " + warp.getWorld().getName();
+
+        String costStr;
+        if (warp.getCost() < 0) {
+            costStr = "Free";
+        } else {
+            costStr = (int) warp.getCost() + " " + warp.getCostType().name();
+        }
+
+        String regionName = "uwp_" + warp.getCompositeId();
+
+        messageManager.send(sender, "warp.info", Map.of(
+                "id", warp.getWarpId(),
+                "type", typeStr,
+                "coord", coord,
+                "cost", costStr,
+                "region", regionName
+        ));
+        playSuccessSound(sender);
+    }
+
+    private void handleFixAll(CommandSender sender) {
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        int removed = 0;
+
+        for (World world : Bukkit.getServer().getWorlds()) {
+            RegionManager rm = container.get(BukkitAdapter.adapt(world));
+            if (rm == null) continue;
+
+            Set<String> toRemove = new HashSet<>();
+            for (String regionId : rm.getRegions().keySet()) {
+                if (!regionId.startsWith("uwp_")) continue;
+
+                String compositeId = regionId.substring(4);
+                if (warpManager.getWarp(compositeId) == null) {
+                    toRemove.add(regionId);
+                }
+            }
+
+            for (String regionId : toRemove) {
+                rm.removeRegion(regionId);
+                removed++;
+            }
+        }
+
+        messageManager.send(sender, "admin.ghost_removed", Map.of("count", String.valueOf(removed)));
+        if (removed > 0) {
+            playSuccessSound(sender);
+        }
+    }
+
     private void playErrorSound(CommandSender sender) {
         if (sender instanceof Player player) {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
@@ -282,7 +355,7 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
             return Collections.emptyList();
 
         if (args.length == 1) {
-            return List.of("reload", "create", "delete", "setting", "give").stream()
+            return List.of("reload", "create", "delete", "setting", "give", "info", "fixall").stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
