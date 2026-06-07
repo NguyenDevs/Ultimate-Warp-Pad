@@ -64,6 +64,7 @@ Two ways:
 | `/wpa delete <id>` | Deletes an admin warp pad |
 | `/wpa setting [id]` | Opens the warp settings GUI (stand on a warp or provide an ID) |
 | `/wpa give <player> [amount]` | Gives a player the Warp Creator item |
+| `/wpa info` | Display information about the warp you're currently standing on.
 | `/wpa reload` | Reloads the plugin configuration |
 
 ### Player Commands — Permission: `uwp.user.*`
