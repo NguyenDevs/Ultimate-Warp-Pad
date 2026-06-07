@@ -440,6 +440,11 @@ public class WarpSelectionGUI {
             inventory.setItem(SLOT_BEACON, createBeaconItem(sourceWarp, mode));
             if (sourceWarp.isOwner(playerUUID)) {
                 inventory.setItem(SLOT_SETTINGS, createSettingsShortcutItem(sourceWarp));
+            } else if (sourceWarp.isAdminWarp()) {
+                Player p = Bukkit.getPlayer(playerUUID);
+                if (p != null && p.hasPermission("uwp.admin")) {
+                    inventory.setItem(SLOT_SETTINGS, createSettingsShortcutItem(sourceWarp));
+                }
             }
         }
 
@@ -477,7 +482,7 @@ public class WarpSelectionGUI {
                     rebuildWarps();
                 }
                 case SLOT_SETTINGS -> {
-                    if (!sourceWarp.isOwner(playerUUID))
+                    if (!sourceWarp.isOwner(playerUUID) && !player.hasPermission("uwp.admin"))
                         return;
                     settingsGUI.open(player, sourceWarp, true);
                 }
