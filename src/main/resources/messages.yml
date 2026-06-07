@@ -19,12 +19,13 @@ warp:
   overlaps_existing: "&cToo close to another warp pad! Keep at least 10 blocks away."
   info:
     - "&8&m+----------------------------+"
-    - "&7ID: &f%id%"
-    - "&7Owner: &f%owner%"
-    - "&7Type: &f%type%"
-    - "&7Coord: &f%coord%"
-    - "&7Cost: &f%cost%"
-    - "&7Region: &f%region%"
+    - "&7ID: &e%id%"
+    - "&7Owner: &e%owner%"
+    - "&7Type: &e%type%"
+    - "&7X: &e%x% &8| &7Y: &e%y% &8| &7Z: &e%z%"
+    - "&7World: &e%world%"
+    - "&7Cost: &e%cost%"
+    - "&7Region: &e%region%"
     - "&8&m+----------------------------+"
 
 cost:

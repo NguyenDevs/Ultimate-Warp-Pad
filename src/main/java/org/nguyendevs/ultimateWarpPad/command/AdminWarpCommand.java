@@ -262,7 +262,10 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
         }
 
         String typeStr = warp.isAdminWarp() ? "WPA" : "WPP";
-        String coord = warp.getLocation().getBlockX() + ", " + warp.getLocation().getBlockY() + ", " + warp.getLocation().getBlockZ() + " " + warp.getWorld().getName();
+        int x = warp.getLocation().getBlockX();
+        int y = warp.getLocation().getBlockY();
+        int z = warp.getLocation().getBlockZ();
+        String worldName = warp.getWorld().getName();
 
         String ownerName;
         if (warp.getOwner() == null) {
@@ -285,7 +288,10 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
                 "id", warp.getWarpId(),
                 "owner", ownerName,
                 "type", typeStr,
-                "coord", coord,
+                "x", String.valueOf(x),
+                "y", String.valueOf(y),
+                "z", String.valueOf(z),
+                "world", worldName,
                 "cost", costStr,
                 "region", regionName
         );
