@@ -51,8 +51,14 @@ public class DatabaseManager {
     }
 
     private void connect() throws SQLException {
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("H2 Driver not found", e);
+        }
+
         String file = plugin.getConfig().getString("database.file", "warps");
-        String dbPath = plugin.getDataFolder().getAbsolutePath() + "/" + file;
+        String dbPath = plugin.getDataFolder().getAbsolutePath().replace('\\', '/') + "/" + file;
         String user = plugin.getConfig().getString("database.username", "sa");
         String pass = plugin.getConfig().getString("database.password", "");
 
