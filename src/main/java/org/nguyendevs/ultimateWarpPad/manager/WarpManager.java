@@ -12,16 +12,13 @@ import com.sk89q.worldedit.math.BlockVector3;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nguyendevs.ultimateWarpPad.database.DatabaseManager;
-import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
-import org.nguyendevs.ultimateWarpPad.model.WarpType;
 import org.nguyendevs.ultimateWarpPad.schematic.AdminWarpSchematicData;
-import org.nguyendevs.ultimateWarpPad.schematic.WarpSchematicData;
+import org.nguyendevs.ultimateWarpPad.schematic.PlayerWarpSchematicData;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -301,8 +298,8 @@ public class WarpManager {
             int ox = cx - 2;
             int oy = cy - 2;
             int oz = cz - 2;
-            List<String> terrainSnapshot = WarpSchematicData.captureArea(world, ox, oy, oz);
-            WarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
+            List<String> terrainSnapshot = PlayerWarpSchematicData.captureArea(world, ox, oy, oz);
+            PlayerWarpSchematicData.paste(world, ox, oy, oz, warp.getSchematicVariant());
             database.saveTerrainSnapshot(cid, terrainSnapshot);
         }
 
@@ -336,7 +333,7 @@ public class WarpManager {
                     if (isAdmin) {
                         AdminWarpSchematicData.restoreArea(world, ox, oy, oz, snapshot);
                     } else {
-                        WarpSchematicData.restoreArea(world, ox, oy, oz, snapshot);
+                        PlayerWarpSchematicData.restoreArea(world, ox, oy, oz, snapshot);
                     }
                 });
             } else {
@@ -344,7 +341,7 @@ public class WarpManager {
                     if (isAdmin) {
                         AdminWarpSchematicData.clearArea(world, ox, oy, oz);
                     } else {
-                        WarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant());
+                        PlayerWarpSchematicData.clearArea(world, ox, oy, oz, warp.getSchematicVariant());
                     }
                 });
                 plugin.getLogger().warning("No terrain snapshot found for warp "
