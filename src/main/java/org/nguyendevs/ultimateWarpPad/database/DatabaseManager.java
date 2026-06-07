@@ -57,6 +57,11 @@ public class DatabaseManager {
             throw new SQLException("H2 Driver not found", e);
         }
 
+        int timeout = plugin.getConfig().getInt("database.connectionTimeout", 30000);
+        if (timeout > 0) {
+            DriverManager.setLoginTimeout(timeout / 1000);
+        }
+
         String file = plugin.getConfig().getString("database.file", "warps");
         String dbPath = plugin.getDataFolder().getAbsolutePath().replace('\\', '/') + "/" + file;
         String user = plugin.getConfig().getString("database.username", "sa");
