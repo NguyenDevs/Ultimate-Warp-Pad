@@ -1,10 +1,20 @@
+#DO NOT CHANGE DATABASE UNLESS YOU KNOW WHAT YOU ARE DOING.
 database:
-  # Filename for the database (without extension, stored in plugin folder).
+  # Filename for the database.
   file: warps
   # Database username.
   username: sa
   # Database password. The default is an empty string.
   password: ""
+  # Maximum number of connections allowed.
+  # Do not change unless you know what you are doing.
+  maxConnections: 50
+  # Maximum lifetime of a connection in milliseconds.
+  # DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING.
+  maxLifetime: 1800000
+  # Connection timeout in milliseconds.
+  # DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING.
+  connectionTimeout: 30000
 
 # Notify ops when a new version is available
 update-notify: true
