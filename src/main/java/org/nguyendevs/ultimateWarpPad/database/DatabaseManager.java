@@ -162,10 +162,9 @@ public class DatabaseManager {
     public CompletableFuture<Void> saveWarp(Warp warp) {
         return CompletableFuture.runAsync(() -> {
             try {
-                String sql = "REPLACE INTO warps " +
-                        "(composite_id, owner_uuid, warp_id, warp_name, world, x, y, z, " +
+                String sql = "MERGE INTO warps (composite_id, owner_uuid, warp_id, warp_name, world, x, y, z, " +
                         "cost_type, cost, range_val, icon, is_public, warp_type, schematic_variant) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "KEY(composite_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
                     String ownerStr = (warp.getOwner() == null) ? Warp.ADMIN_UUID.toString() : warp.getOwner().toString();

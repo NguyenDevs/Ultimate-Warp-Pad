@@ -7,6 +7,7 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 
 import net.kyori.adventure.text.Component;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
