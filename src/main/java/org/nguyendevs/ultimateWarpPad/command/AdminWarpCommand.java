@@ -5,6 +5,8 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 
+import net.kyori.adventure.text.Component;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -261,6 +263,14 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
         String typeStr = warp.isAdminWarp() ? "WPA" : "WPP";
         String coord = warp.getLocation().getBlockX() + ", " + warp.getLocation().getBlockY() + ", " + warp.getLocation().getBlockZ() + " " + warp.getWorld().getName();
 
+        String ownerName;
+        if (warp.getOwner() == null) {
+            ownerName = "Admin";
+        } else {
+            org.bukkit.OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(warp.getOwner());
+            ownerName = op.getName() != null ? op.getName() : warp.getOwner().toString();
+        }
+
         String costStr;
         if (warp.getCost() < 0) {
             costStr = "Free";
@@ -270,13 +280,18 @@ public class AdminWarpCommand implements CommandExecutor, TabCompleter {
 
         String regionName = "uwp_" + warp.getCompositeId();
 
-        messageManager.send(sender, "warp.info", Map.of(
+        Map<String, String> placeholders = Map.of(
                 "id", warp.getWarpId(),
+                "owner", ownerName,
                 "type", typeStr,
                 "coord", coord,
                 "cost", costStr,
                 "region", regionName
-        ));
+        );
+
+        for (Component line : messageManager.getComponentList("warp.info", placeholders)) {
+            sender.sendMessage(line);
+        }
         playSuccessSound(sender);
     }
 

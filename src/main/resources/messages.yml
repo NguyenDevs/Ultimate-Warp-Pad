@@ -17,7 +17,15 @@ warp:
   not_owner: "&cYou do not own this warp pad."
   invalid_id: "&cWarp ID must be alphanumeric."
   overlaps_existing: "&cToo close to another warp pad! Keep at least 10 blocks away."
-  info: "&7ID: &f%id% &8| &7Type: &f%type% &8| &7%coord% &8| &7Cost: &f%cost% &8| &7Region: &f%region%"
+  info:
+    - "&8&m+----------------------------+"
+    - "&7ID: &f%id%"
+    - "&7Owner: &f%owner%"
+    - "&7Type: &f%type%"
+    - "&7Coord: &f%coord%"
+    - "&7Cost: &f%cost%"
+    - "&7Region: &f%region%"
+    - "&8&m+----------------------------+"
 
 cost:
   not_enough_xp: "&cYou &eneed %amount% &cXP. You're missing &e%missing% &cXP."
