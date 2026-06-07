@@ -80,7 +80,7 @@ public class DatabaseManager {
                     "cost DOUBLE NOT NULL DEFAULT -1, " +
                     "range_val INT NOT NULL DEFAULT -1, " +
                     "icon VARCHAR(50) NOT NULL DEFAULT 'NETHER_STAR', " +
-                    "is_public TINYINT(1) NOT NULL DEFAULT 0, " +
+                    "is_public BOOLEAN NOT NULL DEFAULT FALSE, " +
                     "warp_type VARCHAR(10) NOT NULL DEFAULT 'PLAYER', " +
                     "schematic_variant INT NOT NULL DEFAULT 0" +
                     ")");
