@@ -1,12 +1,10 @@
-# Database backend: sqlite or mysql
 database:
-  type: sqlite
-  mysql:
-    host: localhost
-    port: 3306
-    database: ultimatewarpad
-    username: root
-    password: ""
+  # Filename for the database (without extension, stored in plugin folder).
+  file: warps
+  # Database username.
+  username: sa
+  # Database password. The default is an empty string.
+  password: ""
 
 # Notify ops when a new version is available
 update-notify: true

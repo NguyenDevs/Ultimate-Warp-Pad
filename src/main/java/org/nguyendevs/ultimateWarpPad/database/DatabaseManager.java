@@ -4,8 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.nguyendevs.ultimateWarpPad.model.CostType;
 import org.nguyendevs.ultimateWarpPad.model.Warp;
@@ -53,33 +51,12 @@ public class DatabaseManager {
     }
 
     private void connect() throws SQLException {
-        String type = plugin.getConfig().getString("database.type", "sqlite");
+        String file = plugin.getConfig().getString("database.file", "warps");
+        String dbPath = plugin.getDataFolder().getAbsolutePath() + "/" + file;
+        String user = plugin.getConfig().getString("database.username", "sa");
+        String pass = plugin.getConfig().getString("database.password", "");
 
-        if (type.equalsIgnoreCase("mysql")) {
-            connectMySQL();
-        } else {
-            connectSQLite();
-        }
-    }
-
-    private void connectSQLite() throws SQLException {
-        String dbPath = plugin.getDataFolder().getAbsolutePath() + "/warps.db";
-        connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-    }
-
-    private void connectMySQL() throws SQLException {
-        ConfigurationSection mysql = plugin.getConfig().getConfigurationSection("database.mysql");
-        if (mysql == null) throw new SQLException("MySQL configuration not found");
-
-        String host = mysql.getString("host", "localhost");
-        int port = mysql.getInt("port", 3306);
-        String database = mysql.getString("database", "ultimatewarpad");
-        String username = mysql.getString("username", "root");
-        String password = mysql.getString("password", "");
-
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + database
-                + "?useSSL=false&characterEncoding=utf8";
-        connection = DriverManager.getConnection(url, username, password);
+        connection = DriverManager.getConnection("jdbc:h2:file:" + dbPath + ";DB_CLOSE_DELAY=-1", user, pass);
     }
 
     private void createTables() throws SQLException {
@@ -179,7 +156,7 @@ public class DatabaseManager {
     public CompletableFuture<Void> saveWarp(Warp warp) {
         return CompletableFuture.runAsync(() -> {
             try {
-                String sql = "INSERT OR REPLACE INTO warps " +
+                String sql = "REPLACE INTO warps " +
                         "(composite_id, owner_uuid, warp_id, warp_name, world, x, y, z, " +
                         "cost_type, cost, range_val, icon, is_public, warp_type, schematic_variant) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -330,13 +307,10 @@ public class DatabaseManager {
         }
         try {
             if (connection != null && !connection.isClosed()) {
-                String type = plugin.getConfig().getString("database.type", "sqlite");
-                if (type.equalsIgnoreCase("sqlite")) {
-                    try (Statement stmt = connection.createStatement()) {
-                        stmt.execute("VACUUM");
-                    } catch (SQLException e) {
-                        plugin.getLogger().warning("Failed to VACUUM database: " + e.getMessage());
-                    }
+                try (Statement stmt = connection.createStatement()) {
+                    stmt.execute("SHUTDOWN COMPACT");
+                } catch (SQLException e) {
+                    plugin.getLogger().warning("Failed to compact database: " + e.getMessage());
                 }
                 connection.close();
             }

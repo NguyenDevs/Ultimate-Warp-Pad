@@ -14,7 +14,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    implementation("com.h2database:h2:2.2.224")
 }
 
 java {
@@ -33,10 +33,6 @@ tasks {
             }
         }) {
             exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
-        exclude("org/sqlite/native/FreeBSD/**")
-        exclude("org/sqlite/native/Linux-Android/**")
-        exclude("org/sqlite/native/Linux-Musl/**")
-        exclude("org/sqlite/native/Mac/**")
         }
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
